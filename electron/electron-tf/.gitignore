@@ -1,0 +1,6 @@
+bazel-bin
+bazel-electron-tf
+bazel-out
+bazel-testlogs
+*.whl
+.tf_plugin_configure.bazelrc

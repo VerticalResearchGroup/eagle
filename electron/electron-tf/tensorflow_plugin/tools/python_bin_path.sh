@@ -1,0 +1,1 @@
+export PYTHON_BIN_PATH="/home/medavies/.apps/anaconda3/envs/eagle-dev/bin/python"
