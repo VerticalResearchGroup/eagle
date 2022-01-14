@@ -22,6 +22,6 @@ Commands from `$EGL_STACK`:
 * `make full-rebuild`: Wipe and rebuild everything
 * `make`: Incremental build
 
-All outputs are stored in `$EGL_STACL`
+All outputs are stored in `$EGL_STACK`
 
 
