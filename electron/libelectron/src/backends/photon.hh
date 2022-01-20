@@ -2,8 +2,8 @@
 
 #include <iostream>
 
-#include "electron.hh"
-#include "backends/backend.hh"
+#include "electron/electron.hh"
+#include "electron/backend.hh"
 
 namespace electron {
 

@@ -1,10 +1,13 @@
 
 MODULE=electron
 LIB=libelectron.so
-PUBHDRS=$(wildcard public/*.hh) $(wildcard public/*/*.hh)
+PUBHDRS=$(wildcard electron/*.hh) $(wildcard electron/*/*.hh)
 
-SRCS=$(wildcard src/*.cc) $(wildcard src/*/*.cc)
-HDRS=$(wildcard src/*.hh) $(wildcard src/*/*.hh)
+OPSRC_HOST=$(filter-out %-dev.cc, $(wildcard src/operators/*/*.cc))
+OPSRC_DEV=$(filter %-dev.cc, $(wildcard src/operators/*/*.cc))
+
+SRCS=$(wildcard src/*.cc) $(wildcard src/*/*.cc) $(OPSRC_HOST)
+HDRS=$(wildcard src/*.hh) $(wildcard src/*/*.hh) $(wildcard src/operators/*/*.hh)
 
 include ../../buildsys/build.mk
 include ../../buildsys/build-lib.mk

@@ -1,17 +1,23 @@
 #pragma once
 
 #include <iostream>
+#include <vector>
 #include <stdint.h>
 
 namespace upcycle {
+
+typedef void* KernelFunc;
+typedef void* KernelArg;
+
 struct WorkItem {
-    void * entry;
-    void * l_args;
-    void * g_args;
+    KernelFunc prefetch_entry;
+    KernelFunc simd_entry;
+    KernelArg l_args;
+    KernelArg g_args;
 };
 
-struct WorkList {
-    size_t count;
-    WorkItem * items;
-};
+typedef std::vector<WorkItem> WorkList;
+
+typedef void* WorkHandle;
+
 }

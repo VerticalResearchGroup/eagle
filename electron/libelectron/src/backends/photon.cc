@@ -26,12 +26,12 @@ void* PhotonBackend::getsym(const std::string& symname) {
     return sym;
 }
 
-WorkList PhotonBackend::make_worklist(const size_t count) {
-    return {
-        .count = count,
-        .items = (WorkItem*)calloc(count, sizeof(WorkItem))
-    };
-}
+// WorkList PhotonBackend::make_worklist(const size_t count) {
+//     return {
+//         .count = count,
+//         .items = (WorkItem*)calloc(count, sizeof(WorkItem))
+//     };
+// }
 
 
 void PhotonBackend::enqueue(const WorkList& wl) {
@@ -39,9 +39,9 @@ void PhotonBackend::enqueue(const WorkList& wl) {
 }
 
 
-void PhotonBackend::free_worklist(WorkList& wl) {
-    free(wl.items);
-}
+// void PhotonBackend::free_worklist(WorkList& wl) {
+//     free(wl.items);
+// }
 
 PhotonBackend::~PhotonBackend() {
     if (lib_handle) {
