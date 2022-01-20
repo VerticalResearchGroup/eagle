@@ -1,7 +1,7 @@
 
 MODULE=photon
 LIB=libphoton.so
-PUBHDRS=$(wildcard public/*.hh) $(wildcard public/*/*.hh)
+PUBHDRS=$(wildcard photon/*.hh) $(wildcard photon/*/*.hh)
 
 SRCS=$(wildcard src/*.cc)
 HDRS=$(wildcard src/*.hh)

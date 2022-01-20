@@ -7,3 +7,4 @@ COPTS:=
 
 DBGOPTS:=
 
+.PHONY: clean

@@ -4,6 +4,12 @@
 // Here we just define the intrinsic operations to allow user code to at least
 // compile / report errors.
 
+#define VLEN_MAX_I8 64
+#define VLEN_MAX_U8 64
+#define VLEN_MAX_FP16 32
+#define VLEN_MAX_I32 16
+#define VLEN_MAX_U32 16
+
 // GP vector registers
 #define V0 0
 #define V1 1
@@ -48,6 +54,8 @@
 #define T6 6
 #define T7 7
 #define T8 8
+
+#define SIMD_SET_MASK(mask)
 
 // Vector Binary operations
 #define VADD_I8(dst, src1, src2)

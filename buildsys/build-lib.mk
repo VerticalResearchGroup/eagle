@@ -11,6 +11,8 @@ $(OBJS): %.o: %.cc $(HDRS) $(PUBHDRS)
 $(LIB): $(OBJS)
 	$(CXX) $(DBGOPTS) -fPIC -shared -o $@ $(OBJS) $(LIBDIRS)
 
-.PHONY: clean
-clean:
+.PHONY: clean-lib
+clean-lib:
 	rm -f $(LIB) $(OBJS)
+
+clean: clean-lib
