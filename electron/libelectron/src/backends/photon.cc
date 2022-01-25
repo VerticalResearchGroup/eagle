@@ -1,13 +1,17 @@
 #include <dlfcn.h>
+#include <string.h>
 
 #include "backends/photon.hh"
+
 
 using namespace upcycle;
 
 
 namespace electron {
 
-PhotonBackend::PhotonBackend() : lib_handle{nullptr} {}
+PhotonBackend::PhotonBackend() :
+    lib_handle{nullptr},
+    emu(std::make_shared<photon::PhotonEmu>()) { }
 
 void PhotonBackend::loadlib(const std::string& filename) {
     assert(lib_handle == nullptr);
@@ -17,31 +21,34 @@ void PhotonBackend::loadlib(const std::string& filename) {
     assert(lib_handle != nullptr);
 }
 
-void* PhotonBackend::getsym(const std::string& symname) {
+upcycle::KernelFunc PhotonBackend::getsym(const std::string& symname) const {
     void * sym = dlsym(lib_handle, symname.c_str());
 
     // TODO: This shouldn't be an assert but need to add error checking
     assert(sym != nullptr);
 
-    return sym;
-}
-
-// WorkList PhotonBackend::make_worklist(const size_t count) {
-//     return {
-//         .count = count,
-//         .items = (WorkItem*)calloc(count, sizeof(WorkItem))
-//     };
-// }
-
-
-void PhotonBackend::enqueue(const WorkList& wl) {
-    // TODO
+    return (upcycle::KernelFunc)sym;
 }
 
 
-// void PhotonBackend::free_worklist(WorkList& wl) {
-//     free(wl.items);
-// }
+upcycle::WorkHandle PhotonBackend::put_worklist(const upcycle::WorkList& wl) {
+    upcycle::WorkItem * wl_dev =
+        (upcycle::WorkItem *)std::malloc(wl.size() * sizeof(*wl_dev));
+
+    memcpy(wl_dev, wl.data(), wl.size() * sizeof(*wl_dev));
+
+    return std::make_pair((void *)wl_dev, wl.size());
+}
+
+
+void PhotonBackend::enqueue(const WorkHandle& handle) {
+    emu->enqueue(handle);
+}
+
+
+void PhotonBackend::free_workhandle(upcycle::WorkHandle& handle) {
+    std::free(handle.first);
+}
 
 PhotonBackend::~PhotonBackend() {
     if (lib_handle) {

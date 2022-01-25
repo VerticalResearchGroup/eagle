@@ -12,12 +12,12 @@ typedef void* KernelArg;
 struct WorkItem {
     KernelFunc prefetch_entry;
     KernelFunc simd_entry;
-    KernelArg l_args;
     KernelArg g_args;
+    KernelArg l_args;
 };
 
 typedef std::vector<WorkItem> WorkList;
 
-typedef void* WorkHandle;
+typedef std::pair<void*, size_t> WorkHandle;
 
 }

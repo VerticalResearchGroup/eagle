@@ -2,6 +2,7 @@
 MODULE=electron
 LIB=libelectron.so
 PUBHDRS=$(wildcard electron/*.hh) $(wildcard electron/*/*.hh)
+LINKOPTS=-ldl -lphoton
 
 OPSRC_HOST=$(filter-out %-dev.cc, $(wildcard src/operators/*/*.cc))
 OPSRC_DEV=$(filter %-dev.cc, $(wildcard src/operators/*/*.cc))

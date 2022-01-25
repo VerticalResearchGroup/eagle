@@ -9,7 +9,7 @@ $(OBJS): %.o: %.cc $(HDRS) $(PUBHDRS)
 	$(CXX) $(DBGOPTS) -fPIC -o $@ -c $< $(CXXOPTS) $(INCLUDES)
 
 $(LIB): $(OBJS)
-	$(CXX) $(DBGOPTS) -fPIC -shared -o $@ $(OBJS) $(LIBDIRS)
+	$(CXX) $(DBGOPTS) -fPIC -shared -o $@ $(OBJS) $(LINKOPTS) $(LIBDIRS)
 
 .PHONY: clean-lib
 clean-lib:

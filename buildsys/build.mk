@@ -5,6 +5,6 @@ CXX:=g++
 CXXOPTS:=
 COPTS:=
 
-DBGOPTS:=
+DBGOPTS:=-g -O0
 
 .PHONY: clean

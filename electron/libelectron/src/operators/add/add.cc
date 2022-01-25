@@ -1,4 +1,4 @@
-#include "electron/operators/add.hh"
+#include "electron/op-add.hh"
 #include "operators/add/add-dev.hh"
 
 using namespace upcycle;
@@ -68,7 +68,7 @@ AddOp::AddOp(
     for (size_t i = 0; i < num_elems; i += elem_per_thd) {
         dev_l_argss[i].off = i;
         dev_l_argss[i].len = std::min(elem_per_thd, num_elems - i);
-        wl.push_back(WorkItem {prefetch, kern, &g_args, &dev_l_argss[i]});
+        wl.push_back(WorkItem {prefetch, kern, g_args, &dev_l_argss[i]});
     }
 
     backend->sync_device(dev_g_args);

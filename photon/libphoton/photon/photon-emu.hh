@@ -1,4 +1,6 @@
 #pragma once
+#include <stdio.h>
+#include <string.h>
 #include "stdint.h"
 
 #include "photon/photon-arith.hh"
@@ -78,6 +80,13 @@ struct UpcycleEmu {
             acc_fp16[i] += (src1_fp16[i] * src2_fp16[i]);
     }
 
+    static inline void vld(uint8_t * addr, VREG_T& dst) {
+        memcpy(dst.bytes, addr, 64);
+    }
+
+    static inline void vst(uint8_t * addr, VREG_T& dst) {
+        memcpy(addr, dst.bytes, 64);
+    }
 };
 
 }

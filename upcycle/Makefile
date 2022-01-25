@@ -1,6 +1,6 @@
 
 MODULE=upcycle
-INSTALL_HEADERS=$(wildcard public/*.hh)
+INSTALL_HEADERS=$(wildcard upcycle/*.hh)
 
 .PHONY: clean
 

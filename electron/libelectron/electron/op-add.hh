@@ -21,6 +21,11 @@ public:
         Tensor& dst);
 
     virtual void exec();
+
+
+    virtual ~AddOp() {
+        backend->free_workhandle(handle);
+    }
 };
 
 }

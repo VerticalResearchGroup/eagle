@@ -1,5 +1,6 @@
 #pragma once
 
+#include <vector>
 #include <memory>
 
 #include "electron/common.hh"
@@ -41,6 +42,9 @@ public:
     std::vector<size_t>& get_shape() { return shape; }
     const std::vector<size_t>& get_shape() const { return shape; }
     const DataType get_dtype() const { return dtype; }
+
+
+    // TODO: add sync_host/sync_device routines
 
     ~Tensor() {
         backend->free(dev_ptr);

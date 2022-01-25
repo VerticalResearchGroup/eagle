@@ -15,6 +15,7 @@ public:
 
     virtual void exec() = 0;
 
+    virtual ~Operator() {}
 };
 
 }

@@ -7,3 +7,5 @@
 #include "electron/backend.hh"
 #include "electron/tensor.hh"
 #include "electron/operator.hh"
+
+#include "electron/frontend.hh"

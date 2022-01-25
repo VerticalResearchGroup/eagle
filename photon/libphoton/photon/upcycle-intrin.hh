@@ -103,13 +103,13 @@
 #define RELU_FP16(reg)
 
 // Vector load/store operations
-#define VLD(addr, reg)
+#define VLD(addr, reg) photon::UpcycleEmu::vld((uint8_t *)addr, reg)
 #define VBC8(addr, reg)
 #define VBC16(addr, reg)
 #define VBC32(addr, reg)
 #define VLD4T(addr, stride)
 #define VLD1T(addr, stride)
-#define VST(addr, reg)
+#define VST(addr, reg) photon::UpcycleEmu::vst((uint8_t *)addr, reg)
 
 // Prefetch core operations
 #define PREFETCH1(addr, len)

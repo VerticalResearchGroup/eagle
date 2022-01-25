@@ -1,8 +1,15 @@
 #pragma once
 
-class PhotonEmu {
-public:
-    PhotonEmu();
+#include "upcycle/upcycle-api.hh"
 
-    void enqueue();
+namespace photon {
+class PhotonEmu {
+private:
+
+public:
+    PhotonEmu() {}
+
+    void enqueue(upcycle::WorkHandle handle);
 };
+
+}
