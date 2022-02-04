@@ -45,15 +45,15 @@
 #define V31 photon::UpcycleEmu::singleton().gp_regs[31]
 
 // Transpose registers
-#define T0 photon::UpcycleEmu::singleton().gp_regs[0]
-#define T1 photon::UpcycleEmu::singleton().gp_regs[1]
-#define T2 photon::UpcycleEmu::singleton().gp_regs[2]
-#define T3 photon::UpcycleEmu::singleton().gp_regs[3]
-#define T4 photon::UpcycleEmu::singleton().gp_regs[4]
-#define T5 photon::UpcycleEmu::singleton().gp_regs[5]
-#define T6 photon::UpcycleEmu::singleton().gp_regs[6]
-#define T7 photon::UpcycleEmu::singleton().gp_regs[7]
-#define T8 photon::UpcycleEmu::singleton().gp_regs[8]
+#define T0 photon::UpcycleEmu::singleton().t_regs[0]
+#define T1 photon::UpcycleEmu::singleton().t_regs[1]
+#define T2 photon::UpcycleEmu::singleton().t_regs[2]
+#define T3 photon::UpcycleEmu::singleton().t_regs[3]
+#define T4 photon::UpcycleEmu::singleton().t_regs[4]
+#define T5 photon::UpcycleEmu::singleton().t_regs[5]
+#define T6 photon::UpcycleEmu::singleton().t_regs[6]
+#define T7 photon::UpcycleEmu::singleton().t_regs[7]
+#define T8 photon::UpcycleEmu::singleton().t_regs[8]
 
 #define SIMD_SET_MASK(mask) // TODO
 
