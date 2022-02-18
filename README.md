@@ -15,6 +15,7 @@ From there, you will need to install the following things:
 6. Bazelisk: (Download binary [here](https://github.com/bazelbuild/bazelisk/releases), add to path as `bazel`)
 7. Add `export EGL_STACK=/path/to/current-directory` to your `.bashrc`
 8. Add `export EGL_TOOLS=$EGL_STACK/egl-tools` to your `.bashrc`
+8. Add `export LD_LIBRARY_PATH=$EGL_TOOLS/lib` to your `.bashrc`
 
 ### Top Level Building
 Commands from `$EGL_STACK`:
