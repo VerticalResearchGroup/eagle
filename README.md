@@ -12,6 +12,9 @@ From there, you will need to install the following things:
 3. Activate dev environment: `conda activate eagle-dev`
 4. Latest TensorFlow: `pip install tensorflow`
 5. Latest PyTorch: `pip install torch`
+
+   For cpu only machines , use :`pip install torch==1.10.2+cpu -f https://download.pytorch.org/whl/cpu/torch_stable.html`
+
 6. Bazelisk: (Download binary [here](https://github.com/bazelbuild/bazelisk/releases), add to path as `bazel`)
 7. Add `export EGL_STACK=/path/to/current-directory` to your `.bashrc`
 8. Add `export EGL_TOOLS=$EGL_STACK/egl-tools` to your `.bashrc`
