@@ -46,39 +46,23 @@ cc_library(
 )
 
 
-cc_library(
-    name = "conv2d_op",
-    srcs = ["conv_ops_using_gemm.cc"],
-    hdrs = ["gemm_functors.h"],
-    copts = tf_copts(),
-    linkstatic = 1,
-    visibility = ["//visibility:public"],
-    deps = [
-        "//tensorflow_plugin:core",
-        "@com_google_absl//absl/container:inlined_vector",
-        "@eigen_archive//:eigen",
-        "//third_party/eigen3"
-    ],
-    alwayslink = True,
-)
 
-CPU_KERNELS = [
+UPCYCLE_KERNELS = [
     ":relu_op",
-    ":conv2d_op",
     ":bitcast_op",
     ":add_op",
 ]
 
 cc_library(
-    name = "cpu_kernel_impl",
-    srcs = ["cpu_kernel_init.cc"],
+    name = "upcycle_kernel_impl",
+    srcs = ["upcycle_kernel_init.cc"],
     hdrs = [
-        "cpu_kernel_init.h",
+        "upcycle_kernel_init.h",
         "//tensorflow_plugin/src/device/upcycle:cpu_device_plugin.h",
     ],
     visibility = ["//visibility:public"],
     deps = [
         "//tensorflow_plugin:core",
-    ] + CPU_KERNELS,
+    ] + UPCYCLE_KERNELS,
     alwayslink = True,
 )

@@ -9,7 +9,7 @@ cc_library(
     linkstatic = 1,
     visibility = ["//visibility:public"],
     deps = [
-        "//tensorflow_plugin/src/device/cpu:cpu_device_impl",
+        "//tensorflow_plugin/src/device/upcycle:cpu_device_impl",
         "@local_config_tf//:tf_header_lib",
     ],
     alwayslink = True,

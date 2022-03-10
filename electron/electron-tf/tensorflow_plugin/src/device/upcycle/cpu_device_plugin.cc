@@ -1,4 +1,4 @@
-#include "tensorflow_plugin/src/device/cpu/cpu_device_plugin.h"
+#include "tensorflow_plugin/src/device/upcycle/cpu_device_plugin.h"
 #include <sys/sysinfo.h>
 
 #include <cstdlib>
@@ -194,6 +194,23 @@ void plugin_synchronize_all_activity(const SP_Device* device,
   TF_SetStatus(status, TF_OK, "");
 }
 
+void plugin_mem_zero(const SP_Device* device, SP_Stream stream,
+             SP_DeviceMemoryBase* location, uint64_t size, TF_Status* status) {
+
+}
+
+void plugin_memset(const SP_Device* device, SP_Stream stream,
+            SP_DeviceMemoryBase* location, uint8_t pattern, uint64_t size,
+            TF_Status* status) {
+      
+}
+
+void plugin_memset32(const SP_Device* device, SP_Stream stream,
+              SP_DeviceMemoryBase* location, uint32_t pattern, uint64_t size,
+              TF_Status* status) {
+          
+}
+
 // Enqueues on a stream a user-specified function to be run on the host.
 // `callback_arg` should be passed as the first argument to `callback_fn`.
 TF_Bool plugin_host_callback(const SP_Device* device, SP_Stream stream,
@@ -235,6 +252,10 @@ void plugin_create_stream_executor(const SP_Platform* platform,
   params->stream_executor->get_event_status = plugin_get_event_status;
   params->stream_executor->record_event = plugin_record_event;
   params->stream_executor->wait_for_event = plugin_wait_for_event;
+  params->stream_executor->mem_zero = plugin_mem_zero;
+  params->stream_executor->memset = plugin_memset;
+  params->stream_executor->memset32 = plugin_memset32;
+
   params->stream_executor->create_timer = plugin_create_timer;
   params->stream_executor->destroy_timer = plugin_destroy_timer;
   params->stream_executor->start_timer = plugin_start_timer;

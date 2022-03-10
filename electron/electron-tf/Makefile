@@ -2,7 +2,7 @@
 
 default: build
 
-WHL=my_tensorflow_plugin_package-0.0.1-cp36-cp36m-linux_x86_64.whl
+WHL=my_tensorflow_plugin_package-0.0.1-cp37-cp37m-linux_x86_64.whl
 
 build:
 	echo "\n\n\n\n" | ./configure
