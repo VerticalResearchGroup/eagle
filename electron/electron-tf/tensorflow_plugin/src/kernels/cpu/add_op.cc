@@ -121,7 +121,7 @@ void AddOp_Compute(void* kernel, TF_OpKernelContext* ctx) {
 template <typename T>
 void RegisterAddOpKernel(const char* device_type) {
   StatusSafePtr status(TF_NewStatus());
-  auto* builder = TF_NewKernelBuilder("AddV2", device_type, &AddOp_Create,
+  auto* builder = TF_NewKernelBuilder("Add", device_type, &AddOp_Create,
                                       &AddOp_Compute<T>, &AddOp_Delete);
 
   TF_KernelBuilder_TypeConstraint(builder, "T", TF_FLOAT, status.get());
