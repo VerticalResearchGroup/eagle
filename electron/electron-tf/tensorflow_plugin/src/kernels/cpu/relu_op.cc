@@ -90,3 +90,6 @@ void RegisterReluOpKernel(const char* device_type) {
 void RegisterDeviceRelu(const char* device_type) {
   demo_plugin::RegisterReluOpKernel<float>(device_type);
 }
+
+
+
