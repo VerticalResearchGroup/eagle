@@ -22,6 +22,9 @@ public:
     virtual void sync_host(void * ptr) = 0;
     virtual void free(void * dev_ptr) = 0;
 
+    virtual void * dev_malloc(const size_t sz) = 0;
+    virtual void dev_free(void * dev_ptr) = 0;
+    virtual void print_memory() = 0;
     virtual size_t num_tiles() const = 0;
     virtual size_t vbitwidth() const = 0;
 
