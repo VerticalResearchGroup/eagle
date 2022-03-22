@@ -8,6 +8,7 @@ using namespace upcycle;
 
 
 namespace electron {
+Memory_mgmt::Memory_mgmt dev_mem_obj;
 
 PhotonBackend::PhotonBackend() :
     lib_handle{nullptr},
@@ -24,7 +25,8 @@ void PhotonBackend::loadlib(const std::string& filename) {
 
     // TODO: This shouldn't be an assert but need to add error checking
     assert(lib_handle != nullptr);
-    Memory_mgmt::init_devmem(4000*4);
+    //Memory_mgmt::init_devmem(4000*4);
+    dev_mem_obj.init_devmem(4000*4);
 
 }
 
