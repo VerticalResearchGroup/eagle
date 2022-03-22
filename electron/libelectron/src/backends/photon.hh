@@ -24,9 +24,13 @@ public:
     virtual void free_workhandle(const upcycle::WorkHandle handle);
 
     virtual void * malloc(const size_t sz) { return std::malloc(sz); }
+
     virtual void sync_device(void * ptr) { }
     virtual void sync_host(void * ptr) { }
     virtual void free(void * dev_ptr) { return std::free(dev_ptr); }
+    virtual void * dev_malloc(const size_t sz);
+    virtual void dev_free(void * dev_ptr);
+    virtual void print_memory();
 
     virtual size_t num_tiles() const { return emu->num_tiles; }
     virtual size_t vbitwidth() const { return emu->vbitwidth; }
