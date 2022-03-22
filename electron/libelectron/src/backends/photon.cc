@@ -1,6 +1,6 @@
 #include <dlfcn.h>
 #include <string.h>
-
+#include "memory_mgmt.hh"
 #include "backends/photon.hh"
 
 
@@ -19,6 +19,8 @@ void PhotonBackend::loadlib(const std::string& filename) {
 
     // TODO: This shouldn't be an assert but need to add error checking
     assert(lib_handle != nullptr);
+    Memory_mgmt::init_devmem(4000*4);
+
 }
 
 upcycle::KernelFunc PhotonBackend::getsym(const std::string& symname) const {
@@ -40,6 +42,23 @@ void PhotonBackend::enqueue(const WorkHandle& handle) {
 
 void PhotonBackend::free_workhandle(const upcycle::WorkHandle handle) {
     delete ((photon::WorkHandle *)handle);
+}
+
+//New memory management
+void* PhotonBackend::dev_malloc(const size_t sz) { 
+    //return std::malloc(sz); 
+    return Memory_mgmt::dev_malloc(sz);
+}
+
+void PhotonBackend::dev_free(void *dev_ptr) { 
+    //free(dev_ptr);
+    Memory_mgmt::print_memory();
+    Memory_mgmt::dev_free(dev_ptr);
+    return; 
+}
+
+void PhotonBackend::print_memory(){
+    Memory_mgmt::print_memory();
 }
 
 PhotonBackend::~PhotonBackend() {
