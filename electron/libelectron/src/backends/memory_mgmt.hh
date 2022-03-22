@@ -57,10 +57,11 @@ void *dev_malloc(size_t req_mem) {
     free_node=free_node->next;
   } while(free_node != heap_start);
 
-  if(!block) {
+  assert(block!=NULL);
+  /*if(!block) {
     printf("No free blocks available");
     return NULL;
-  }
+  }*/
 
   if(block->size > (requested+sizeof(struct memBlock))) {
     //Split the available block of memory into two blocks
@@ -85,11 +86,12 @@ void *dev_malloc(size_t req_mem) {
 
 void *dev_free(void* block) {
 
+  assert(block!=NULL);
   //Return error on NULL ptr
-  if(block==NULL){
+  /*if(block==NULL){
     printf("Deallocating a NULL reference\n");
     return NULL;
-  }
+  }*/
 
   struct memBlock* node = heap_start;
   int found = 0;
@@ -101,10 +103,11 @@ void *dev_free(void* block) {
   } while((node = node->next) != heap_start);
   
   //Input address pointer not found in the memory list
-  if(found==0){
+  assert(found!=0);
+  /*if(found==0){
     printf("Invalid pointer reference\n");
     return NULL;
-  }
+  }*/
 
   //Set used bit to 0
   node->used = 0;
