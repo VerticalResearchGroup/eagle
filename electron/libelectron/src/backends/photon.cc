@@ -8,6 +8,7 @@ using namespace upcycle;
 
 
 namespace electron {
+Memory_mgmt::Memory_mgmt dev_mem_obj;
 
 PhotonBackend::PhotonBackend() :
     lib_handle{nullptr},
@@ -19,7 +20,8 @@ void PhotonBackend::loadlib(const std::string& filename) {
 
     // TODO: This shouldn't be an assert but need to add error checking
     assert(lib_handle != nullptr);
-    Memory_mgmt::init_devmem(4000*4);
+    //Memory_mgmt::init_devmem(4000*4);
+    dev_mem_obj.init_devmem(4000*4);
 
 }
 
@@ -44,21 +46,22 @@ void PhotonBackend::free_workhandle(const upcycle::WorkHandle handle) {
     delete ((photon::WorkHandle *)handle);
 }
 
-//New memory management
+//New memory management - malloc
 void* PhotonBackend::dev_malloc(const size_t sz) { 
     //return std::malloc(sz); 
-    return Memory_mgmt::dev_malloc(sz);
+    return dev_mem_obj.dev_malloc(sz);
 }
 
+//New memory management - free
 void PhotonBackend::dev_free(void *dev_ptr) { 
     //free(dev_ptr);
-    Memory_mgmt::print_memory();
-    Memory_mgmt::dev_free(dev_ptr);
+    //dev_mem_obj.print_memory();
+    dev_mem_obj.dev_free(dev_ptr);
     return; 
 }
 
 void PhotonBackend::print_memory(){
-    Memory_mgmt::print_memory();
+    dev_mem_obj.print_memory();
 }
 
 PhotonBackend::~PhotonBackend() {
