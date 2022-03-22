@@ -1,6 +1,6 @@
 #include <dlfcn.h>
 #include <string.h>
-
+#include "memory_mgmt.hh"
 #include "backends/photon.hh"
 
 
@@ -24,6 +24,8 @@ void PhotonBackend::loadlib(const std::string& filename) {
 
     // TODO: This shouldn't be an assert but need to add error checking
     assert(lib_handle != nullptr);
+    Memory_mgmt::init_devmem(4000*4);
+
 }
 
 upcycle::KernelFunc PhotonBackend::getsym(const std::string& symname) const {
