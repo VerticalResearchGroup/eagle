@@ -5,28 +5,29 @@
 #include <memory>
 #include <sys/mman.h>
 
-namespace memory_mgmt{
+namespace memory_mgmt {
 
-class FirstFitAllocator{
+class FirstFitAllocator {
+private:
+    struct MemBlock
+    {
+        int size;
+        char used;
+        void *ptr;
+        std::shared_ptr<MemBlock> prev;
+        std::shared_ptr<MemBlock> next;
+    };
+
+    std::shared_ptr<MemBlock> heap_start;
+
 public:
-struct MemBlock
-{
-    int size;
-    char used;
-    void *ptr;
-    std::shared_ptr<struct MemBlock> prev;
-    std::shared_ptr<struct MemBlock> next;
-};
+    FirstFitAllocator(size_t sz);
+    void *dev_malloc(size_t requested);
+    void dev_free(void* block);
+    void print_memory();
 
-FirstFitAllocator(size_t sz);
-void *dev_malloc(size_t requested);
-void dev_free(void* block);
-void print_memory();
+    void *device_memory = NULL;
 
-
-void *device_memory = NULL;
-
-std::shared_ptr<struct MemBlock> heap_start;
 };
 
 }
