@@ -11,7 +11,7 @@ class FirstFitAllocator {
 private:
     struct MemBlock
     {
-        int size;
+        unsigned long int size;
         char used;
         void *ptr;
         std::shared_ptr<MemBlock> prev;
@@ -21,13 +21,10 @@ private:
     std::shared_ptr<MemBlock> heap_start;
 
 public:
-    FirstFitAllocator(size_t sz);
+    FirstFitAllocator(size_t sz, void* device_memory);
     void *dev_malloc(size_t requested);
     void dev_free(void* block);
     void print_memory();
-
-    void *device_memory = NULL;
-
 };
 
 }

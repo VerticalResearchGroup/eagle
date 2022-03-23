@@ -18,6 +18,7 @@ public:
     PhotonBackend();
 
     std::shared_ptr<memory_mgmt::FirstFitAllocator> allocator;
+    void *device_memory = NULL;
     virtual void loadlib(const std::string& filename);
     virtual upcycle::KernelFunc getsym(const std::string& symname) const;
     virtual upcycle::WorkHandle put_worklist(const upcycle::GlobalWorkList& gwl);
