@@ -2,29 +2,31 @@
 #include <string.h>
 #include <stdio.h>
 #include <assert.h>
+#include <memory>
+#include <sys/mman.h>
 
-namespace Memory_mgmt{
+namespace memory_mgmt{
 
-class Memory_mgmt{
+class FirstFitAllocator{
 public:
-struct memBlock
+struct MemBlock
 {
-  int size;            
-  char used;          
-  void *ptr;
-  struct memBlock *prev;
-  struct memBlock *next;
+    int size;
+    char used;
+    void *ptr;
+    std::shared_ptr<struct MemBlock> prev;
+    std::shared_ptr<struct MemBlock> next;
 };
 
-void init_devmem(size_t sz);
+FirstFitAllocator(size_t sz);
 void *dev_malloc(size_t requested);
-void *dev_free(void* block);
+void dev_free(void* block);
 void print_memory();
 
 
 void *device_memory = NULL;
 
-struct memBlock *heap_start;
+std::shared_ptr<struct MemBlock> heap_start;
 };
 
 }
