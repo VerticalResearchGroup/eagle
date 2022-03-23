@@ -25,7 +25,7 @@ public:
         const Shape& _shape) :
         backend(_backend),
         dtype(_dtype),
-        dev_ptr(backend->dev_malloc(dtype_size(_dtype) * num_elem(_shape))),
+        dev_ptr(backend->malloc(dtype_size(_dtype) * num_elem(_shape))),
         shape(_shape) {}
 
     static size_t num_elem(const Shape& shape) {
@@ -47,7 +47,7 @@ public:
     // TODO: add sync_host/sync_device routines
 
     ~Tensor() {
-        backend->dev_free(dev_ptr);
+        backend->free(dev_ptr);
     }
 };
 
