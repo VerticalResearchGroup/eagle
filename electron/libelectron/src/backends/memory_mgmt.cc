@@ -2,10 +2,9 @@
 
 namespace memory_mgmt {
 
-FirstFitAllocator::FirstFitAllocator(size_t dev_mem_size) {
+FirstFitAllocator::FirstFitAllocator(size_t dev_mem_size, void* device_memory) {
 
     /* Initialize structures*/
-    device_memory = mmap(NULL, dev_mem_size, PROT_READ | PROT_WRITE, MAP_ANONYMOUS | MAP_SHARED, 0, 0);
     heap_start = std::make_shared<MemBlock>();
     heap_start->size = dev_mem_size;
     heap_start->used = 0;
@@ -15,14 +14,9 @@ FirstFitAllocator::FirstFitAllocator(size_t dev_mem_size) {
     heap_start->next = NULL;
 }
 
-void *FirstFitAllocator::dev_malloc(size_t req_mem) {
+void *FirstFitAllocator::dev_malloc(size_t requested) {
 
     std::shared_ptr<MemBlock> block(nullptr);
-
-    //Align to size of 8 bytes
-    int align = 8;
-    size_t requested = req_mem;
-    requested = (req_mem + align - 1) & ~(align - 1);
     
     // Get the first free block in list
     std::shared_ptr<struct MemBlock> free_node = heap_start;
@@ -112,7 +106,7 @@ void FirstFitAllocator::print_memory() {
 
     std::shared_ptr<MemBlock> node = heap_start;
     do {
-        printf("\tBlock %p, size %d, %s\n", node->ptr,
+        printf("\tBlock %p, size %lud, %s\n", node->ptr,
               node->size, (node->used ? "[ALLOCATED]" : "[FREE]"));
     } while ((node = node->next));
     printf("]\n");
