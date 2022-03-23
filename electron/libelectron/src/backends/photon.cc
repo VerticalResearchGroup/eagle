@@ -24,8 +24,6 @@ void PhotonBackend::loadlib(const std::string& filename) {
 
     // TODO: This shouldn't be an assert but need to add error checking
     assert(lib_handle != nullptr);
-    //TODO: Amount of memory to allocate?
-    allocator = std::make_shared<memory_mgmt::FirstFitAllocator>(10*4000);
 
 }
 
