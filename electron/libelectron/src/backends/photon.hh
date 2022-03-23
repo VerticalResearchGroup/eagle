@@ -19,6 +19,7 @@ private:
 public:
     PhotonBackend();
 
+    memory_mgmt::FirstFitAllocator *dev_mem_obj;
     virtual void loadlib(const std::string& filename);
     virtual upcycle::KernelFunc getsym(const std::string& symname) const;
     virtual upcycle::WorkHandle put_worklist(const upcycle::GlobalWorkList& gwl);
