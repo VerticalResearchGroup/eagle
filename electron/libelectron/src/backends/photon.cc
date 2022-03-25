@@ -31,13 +31,24 @@ upcycle::KernelFunc PhotonBackend::getsym(const std::string& symname) const {
 }
 
 
-upcycle::WorkHandle PhotonBackend::put_worklist(const upcycle::WorkList& wl) {
-    upcycle::WorkItem * wl_dev =
-        (upcycle::WorkItem *)std::malloc(wl.size() * sizeof(*wl_dev));
+upcycle::WorkHandle PhotonBackend::put_worklist(const upcycle::GlobalWorkList& gwl, const std::vector<upcycle::WorkList>& wl) {
+    //upcycle::WorkItem * wl_dev =
+    //    (upcycle::WorkItem *)std::malloc(wl.size(i) * sizeof(*wl_dev));
+    upcycle::GlobalWorkItem* dev_gwl = (upcycle::GlobalWorkItem *)std::malloc(gwl.size() * sizeof(upcycle::GlobalWorkItem));
+    upcycle::WorkItem ** dev_wl = (upcycle::WorkItem **)std::malloc(gwl.size * sizeof(*upcycle::WorkItem));
 
-    memcpy(wl_dev, wl.data(), wl.size() * sizeof(*wl_dev));
+    memcpy(dev_gwl,gwl.data(),gwl.size() * sizeof(*dev_gwl));
 
-    return std::make_pair((void *)wl_dev, wl.size());
+    for(size_t i=0; i<gwl.size() ; i++){
+     dev_wl[i] = (upcycle::WorkItem *)std::malloc(2*sizeof(upcycle::WorkItem));
+     dev_wl[i][0] = wl[i][0]; //Pftch thread
+     dev_wl[i][1] = wl[i][1]; //Simd thread
+    }
+
+
+    //memcpy(wl_dev, wl.data(), wl.size() * sizeof(*wl_dev));
+
+    return std::make_pair((void *)dev_gwl, dev_gwl.size());
 }
 
 
