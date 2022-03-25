@@ -5,7 +5,7 @@ typedef void(*EmuKernelFunc)(upcycle::KernelArg, upcycle::KernelArg);
 namespace photon {
 
 void PhotonEmu::enqueue(const upcycle::WorkHandle handle) {
-    upcycle::WorkItem * work_list = (upcycle::WorkItem *)handle.first;
+    upcycle::WorkList * global_work_list = (upcycle::WorkList *)handle.first;
     size_t len = handle.second;
 
     //
@@ -16,11 +16,13 @@ void PhotonEmu::enqueue(const upcycle::WorkHandle handle) {
     //
 
     for (size_t i = 0; i < len; i++) {
-        auto item = work_list[i];
+     for(size_t j = 0; j < 2; j++){
+        auto item = work_list[i][j];
         EmuKernelFunc pf_entry = (EmuKernelFunc)item.prefetch_entry;
         EmuKernelFunc simd_entry = (EmuKernelFunc)item.simd_entry;
         pf_entry(item.g_args, item.l_args);
         simd_entry(item.g_args, item.l_args);
+     }
     }
 }
 
