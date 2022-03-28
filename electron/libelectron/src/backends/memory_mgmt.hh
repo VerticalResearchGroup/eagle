@@ -4,6 +4,7 @@
 #include <assert.h>
 #include <memory>
 #include <sys/mman.h>
+#include <optional>
 
 namespace memory_mgmt {
 
@@ -13,7 +14,7 @@ private:
     {
         unsigned long int size;
         char used;
-        void *ptr;
+        uint64_t offset;
         std::shared_ptr<MemBlock> prev;
         std::shared_ptr<MemBlock> next;
     };
@@ -22,8 +23,8 @@ private:
 
 public:
     FirstFitAllocator(size_t sz);
-    std::pair<bool,uintptr_t> dev_malloc(size_t requested);
-    void dev_free(void* block);
+    std::optional<uintptr_t> dev_malloc(size_t requested);
+    void dev_free(uint64_t block);
     void print_memory();
 };
 

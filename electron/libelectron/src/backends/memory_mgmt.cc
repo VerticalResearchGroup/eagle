@@ -8,17 +8,16 @@ FirstFitAllocator::FirstFitAllocator(size_t dev_mem_size) {
     heap_start = std::make_shared<MemBlock>();
     heap_start->size = dev_mem_size;
     heap_start->used = 0;
-    heap_start->ptr = 0;
+    heap_start->offset = 0;
 
     heap_start->prev = NULL;
     heap_start->next = NULL;
 }
 
-std::pair<bool,uintptr_t> FirstFitAllocator::dev_malloc(size_t requested) {
+std::optional<uintptr_t> FirstFitAllocator::dev_malloc(size_t requested) {
 
     std::shared_ptr<MemBlock> block(nullptr);
-    std::pair<bool,uintptr_t> block_stat_offset;
-    block_stat_offset.first = false;
+
     // Get the first free block in list
     std::shared_ptr<MemBlock> free_node = heap_start;
     do {
@@ -30,7 +29,7 @@ std::pair<bool,uintptr_t> FirstFitAllocator::dev_malloc(size_t requested) {
     } while (free_node != heap_start);
 
     if(block == NULL) {
-        return block_stat_offset;
+        return std::nullopt;
     }
 
     if (block->size > requested) {
@@ -46,23 +45,21 @@ std::pair<bool,uintptr_t> FirstFitAllocator::dev_malloc(size_t requested) {
 
         new_free_block->size = block->size - requested;
         new_free_block->used = 0;
-        new_free_block->ptr = block->ptr + requested;
+        new_free_block->offset = block->offset + requested;
         block->size = requested;
     }
 
     block->used = 1;
-    // Return the allocated pointer and set allocation status as true
-    block_stat_offset.first = true;
-    block_stat_offset.second = (uint64_t)block->ptr;
-    return block_stat_offset;
+    // Return the allocated pointer
+    return block->offset;
 }
 
-void FirstFitAllocator::dev_free(void* block) {
+void FirstFitAllocator::dev_free(uint64_t block) {
 
     std::shared_ptr<MemBlock> node = heap_start;
     int found = 0;
     do {
-        if (node->ptr == block) {
+        if (node->offset == block) {
             found = 1;
             break;
         }
@@ -109,7 +106,7 @@ void FirstFitAllocator::print_memory() {
 
     std::shared_ptr<MemBlock> node = heap_start;
     do {
-        printf("\tBlock %p, size %lud, %s\n", node->ptr,
+        printf("\tBlock %ld, size %lud, %s\n", node->offset,
               node->size, (node->used ? "[ALLOCATED]" : "[FREE]"));
     } while ((node = node->next));
     printf("]\n");
