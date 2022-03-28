@@ -21,8 +21,8 @@ private:
     std::shared_ptr<MemBlock> heap_start;
 
 public:
-    FirstFitAllocator(size_t sz, void* device_memory);
-    void *dev_malloc(size_t requested);
+    FirstFitAllocator(size_t sz);
+    std::pair<bool,uintptr_t> dev_malloc(size_t requested);
     void dev_free(void* block);
     void print_memory();
 };
