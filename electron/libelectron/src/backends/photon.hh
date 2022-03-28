@@ -35,8 +35,9 @@ public:
     virtual void sync_device(void * ptr) { }
     virtual void sync_host(void * ptr) { }
     virtual void free(void * dev_ptr) {
-        assert (dev_ptr != NULL);
-        return allocator->dev_free(((void *)((uintptr_t)dev_ptr - (uintptr_t)device_memory)));
+        if (dev_ptr != NULL) {
+            return allocator->dev_free(((void *)((uintptr_t)dev_ptr - (uintptr_t)device_memory)));
+        }
     }
     virtual size_t num_tiles() const { return emu->num_tiles; }
     virtual size_t vbitwidth() const { return emu->vbitwidth; }
