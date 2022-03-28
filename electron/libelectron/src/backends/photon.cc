@@ -12,10 +12,11 @@ namespace electron {
 PhotonBackend::PhotonBackend() :
     lib_handle{nullptr},
     emu(std::make_shared<photon::PhotonEmu>(4, 512)) {  // TODO: Get # tiles from environment or caller
-        device_memory = mmap(NULL, (unsigned long int) 8 * (1 << 30), PROT_READ | PROT_WRITE, MAP_ANONYMOUS | MAP_SHARED, 0, 0);
-        assert(device_memory != MAP_FAILED);
-        allocator=std::make_shared<memory_mgmt::FirstFitAllocator>((unsigned long int) 8 * (1 << 30), device_memory);
-    }
+    allocator(std::make_shared<memory_mgmt::FirstFitAllocator>((unsigned long int) 8 * (1 << 30))),
+    device_memory(mmap(NULL, (unsigned long int) 8 * (1 << 30), PROT_READ | PROT_WRITE, MAP_ANONYMOUS | MAP_SHARED, -1, 0))
+{
+    assert(device_memory != MAP_FAILED);
+}
 
 void PhotonBackend::loadlib(const std::string& filename) {
     assert(lib_handle == nullptr);
@@ -23,7 +24,6 @@ void PhotonBackend::loadlib(const std::string& filename) {
 
     // TODO: This shouldn't be an assert but need to add error checking
     assert(lib_handle != nullptr);
-
 }
 
 upcycle::KernelFunc PhotonBackend::getsym(const std::string& symname) const {

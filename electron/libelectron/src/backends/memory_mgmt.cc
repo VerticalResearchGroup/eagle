@@ -2,24 +2,25 @@
 
 namespace memory_mgmt {
 
-FirstFitAllocator::FirstFitAllocator(size_t dev_mem_size, void* device_memory) {
+FirstFitAllocator::FirstFitAllocator(size_t dev_mem_size) {
 
     /* Initialize structures*/
     heap_start = std::make_shared<MemBlock>();
     heap_start->size = dev_mem_size;
     heap_start->used = 0;
-    heap_start->ptr = device_memory;
+    heap_start->ptr = 0;
 
     heap_start->prev = NULL;
     heap_start->next = NULL;
 }
 
-void *FirstFitAllocator::dev_malloc(size_t requested) {
+std::pair<bool,uintptr_t> FirstFitAllocator::dev_malloc(size_t requested) {
 
     std::shared_ptr<MemBlock> block(nullptr);
-    
+    std::pair<bool,uintptr_t> block_stat_offset;
+    block_stat_offset.first = false;
     // Get the first free block in list
-    std::shared_ptr<struct MemBlock> free_node = heap_start;
+    std::shared_ptr<MemBlock> free_node = heap_start;
     do {
         if (!(free_node->used) && free_node->size >= requested) {
             block = free_node;
@@ -28,7 +29,9 @@ void *FirstFitAllocator::dev_malloc(size_t requested) {
         free_node = free_node->next;
     } while (free_node != heap_start);
 
-    assert(block != NULL);
+    if(block == NULL) {
+        return block_stat_offset;
+    }
 
     if (block->size > requested) {
         //Split the available block of memory into two blocks
@@ -49,12 +52,12 @@ void *FirstFitAllocator::dev_malloc(size_t requested) {
 
     block->used = 1;
     // Return the allocated pointer
-    return block->ptr;
+    block_stat_offset.first = true;
+    block_stat_offset.second = (uint64_t)block->ptr;
+    return block_stat_offset;
 }
 
 void FirstFitAllocator::dev_free(void* block) {
-
-    assert(block != NULL);
 
     std::shared_ptr<MemBlock> node = heap_start;
     int found = 0;
