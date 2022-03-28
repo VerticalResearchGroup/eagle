@@ -27,7 +27,7 @@ public:
 
     virtual void * malloc(const size_t sz) {
         std::pair<bool,uintptr_t> block_stat_offset = allocator->dev_malloc(sz);
-        if(block_stat_offset.first == false) {
+        if (block_stat_offset.first == false) {
             return NULL;
         }
         return ((void *)((uintptr_t)device_memory + block_stat_offset.second));

@@ -51,7 +51,7 @@ std::pair<bool,uintptr_t> FirstFitAllocator::dev_malloc(size_t requested) {
     }
 
     block->used = 1;
-    // Return the allocated pointer
+    // Return the allocated pointer and set allocation status as true
     block_stat_offset.first = true;
     block_stat_offset.second = (uint64_t)block->ptr;
     return block_stat_offset;
