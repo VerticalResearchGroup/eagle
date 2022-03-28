@@ -35,6 +35,7 @@ public:
     virtual void sync_device(void * ptr) { }
     virtual void sync_host(void * ptr) { }
     virtual void free(void * dev_ptr) {
+        allocator->print_memory();
         if (dev_ptr != NULL) {
             return allocator->dev_free(((uint64_t)((uintptr_t)dev_ptr - (uintptr_t)dev_base)));
         }
