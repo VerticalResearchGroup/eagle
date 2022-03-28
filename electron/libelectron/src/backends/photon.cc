@@ -24,7 +24,6 @@ void PhotonBackend::loadlib(const std::string& filename) {
 
     // TODO: This shouldn't be an assert but need to add error checking
     assert(lib_handle != nullptr);
-
 }
 
 upcycle::KernelFunc PhotonBackend::getsym(const std::string& symname) const {

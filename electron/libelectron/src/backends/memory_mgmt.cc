@@ -2,7 +2,7 @@
 
 namespace memory_mgmt {
 
-FirstFitAllocator::FirstFitAllocator(size_t dev_mem_size, void* device_memory) {
+FirstFitAllocator::FirstFitAllocator(size_t dev_mem_size) {
 
     /* Initialize structures*/
     heap_start = std::make_shared<MemBlock>();
