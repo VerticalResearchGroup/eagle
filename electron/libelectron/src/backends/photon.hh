@@ -14,7 +14,7 @@ private:
     void * lib_handle;
     std::shared_ptr<photon::PhotonEmu> emu;
     std::shared_ptr<memory_mgmt::FirstFitAllocator> allocator;
-    void *device_memory = NULL;
+    void *dev_base = NULL;
 
 public:
     PhotonBackend();
@@ -30,14 +30,13 @@ public:
         if (offset == std::nullopt) {
             return NULL;
         }
-        return ((void *)((uintptr_t)device_memory + *offset));
+        return ((void *)((uintptr_t)dev_base + *offset));
     }
     virtual void sync_device(void * ptr) { }
     virtual void sync_host(void * ptr) { }
     virtual void free(void * dev_ptr) {
-        allocator->print_memory();
         if (dev_ptr != NULL) {
-            return allocator->dev_free(((uint64_t)((uintptr_t)dev_ptr - (uintptr_t)device_memory)));
+            return allocator->dev_free(((uint64_t)((uintptr_t)dev_ptr - (uintptr_t)dev_base)));
         }
     }
     virtual size_t num_tiles() const { return emu->num_tiles; }
