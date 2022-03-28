@@ -26,17 +26,18 @@ public:
     virtual void free_workhandle(const upcycle::WorkHandle handle);
 
     virtual void * malloc(const size_t sz) {
-        std::pair<bool,uintptr_t> block_stat_offset = allocator->dev_malloc(sz);
-        if (block_stat_offset.first == false) {
+        std::optional<uintptr_t> offset = allocator->dev_malloc(sz);
+        if (offset == std::nullopt) {
             return NULL;
         }
-        return ((void *)((uintptr_t)device_memory + block_stat_offset.second));
+        return ((void *)((uintptr_t)device_memory + *offset));
     }
     virtual void sync_device(void * ptr) { }
     virtual void sync_host(void * ptr) { }
     virtual void free(void * dev_ptr) {
+        allocator->print_memory();
         if (dev_ptr != NULL) {
-            return allocator->dev_free(((void *)((uintptr_t)dev_ptr - (uintptr_t)device_memory)));
+            return allocator->dev_free(((uint64_t)((uintptr_t)dev_ptr - (uintptr_t)device_memory)));
         }
     }
     virtual size_t num_tiles() const { return emu->num_tiles; }
