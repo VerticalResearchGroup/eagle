@@ -90,17 +90,17 @@
 #define VFMA_FP16(acc, src1, src2)    photon::UpcycleEmu::vfma_fp16(acc, src1, src2)
 
 // Unary / activation functions
-#define SIGMOID_I8(reg)
-#define SIGMOID_U8(reg)
-#define SIGMOID_FP16(reg)
+#define VSIGMOID_I8(reg)   photon::UpcycleEmu::vsigmoid_i8(reg)
+#define VSIGMOID_U8(reg)   photon::UpcycleEmu::vsigmoid_u8(reg)
+#define VSIGMOID_FP16(reg) photon::UpcycleEmu::vsigmoid_fp16(reg)
 
-#define TANH_I8(reg)
-#define TANH_U8(reg)
-#define TANH_FP16(reg)
+#define VTANH_I8(reg)   photon::UpcycleEmu::vtanh_i8(reg)
+#define VTANH_U8(reg)   photon::UpcycleEmu::vtanh_u8(reg)
+#define VTANH_FP16(reg) photon::UpcycleEmu::vtanh_fp16(reg)
 
-#define RELU_I8(reg)
-#define RELU_U8(reg)
-#define RELU_FP16(reg)
+#define VRELU_I8(reg)   photon::UpcycleEmu::vrelu_i8(reg)
+#define VRELU_U8(reg)   photon::UpcycleEmu::vrelu_u8(reg)
+#define VRELU_FP16(reg) photon::UpcycleEmu::vrelu_fp16(reg)
 
 // Vector load/store operations
 #define VLD(addr, reg) photon::UpcycleEmu::vld((uint8_t *)addr, reg)
