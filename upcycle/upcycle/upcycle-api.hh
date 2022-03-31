@@ -16,14 +16,8 @@ struct WorkItem {
     KernelArg l_args;
 };
 
-struct GlobalWorkItem{
-    WorkItem* item;
-    uint32_t  length;
-}
-
-typedef std::vector<WorkItem> WorkList;
-typedef std::vector<GloablWorkItem> GlobalWorkList;
-
-typedef std::pair<void*, size_t> WorkHandle;
+typedef std::vector<WorkItem> TileWorkList;
+typedef std::vector<TileWorkList> GlobalWorkList;
+typedef void * WorkHandle;
 
 }

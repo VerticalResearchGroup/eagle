@@ -5,24 +5,16 @@ typedef void(*EmuKernelFunc)(upcycle::KernelArg, upcycle::KernelArg);
 namespace photon {
 
 void PhotonEmu::enqueue(const upcycle::WorkHandle handle) {
-    upcycle::WorkList * global_work_list = (upcycle::WorkList *)handle.first;
-    size_t len = handle.second;
+    const auto& glb_wl = ((WorkHandle *)handle)->glb_wl;
+    assert(glb_wl.size() == num_tiles);
 
-    //
-    // TODO:
-    // This is pretending we have a single core and it's dispatching items in-
-    // order. We need this to emulate the ACTUAL scheduling algorithm (whatever
-    // that may end up being).
-    //
-
-    for (size_t i = 0; i < len; i++) {
-     for(size_t j = 0; j < 2; j++){
-        auto item = work_list[i][j];
-        EmuKernelFunc pf_entry = (EmuKernelFunc)item.prefetch_entry;
-        EmuKernelFunc simd_entry = (EmuKernelFunc)item.simd_entry;
-        pf_entry(item.g_args, item.l_args);
-        simd_entry(item.g_args, item.l_args);
-     }
+    for (size_t tile_id = 0; tile_id < num_tiles; tile_id++) {
+        for (const auto& wi : glb_wl.at(tile_id)) {
+            EmuKernelFunc pf_entry = (EmuKernelFunc)wi.prefetch_entry;
+            EmuKernelFunc simd_entry = (EmuKernelFunc)wi.simd_entry;
+            pf_entry(wi.g_args, wi.l_args);
+            simd_entry(wi.g_args, wi.l_args);
+        }
     }
 }
 

@@ -20,9 +20,10 @@ int main() {
     auto backend = electron::make_backend("photon");
     backend->loadlib(lib_path());
 
-    auto src1 = electron::Tensor(backend, DT_INT8, Tensor::Shape { 2048 });
-    auto src2 = electron::Tensor(backend, DT_INT8, Tensor::Shape { 2048 });
-    auto dst = electron::Tensor(backend, DT_INT8, Tensor::Shape { 2048 });
+    std::cout << "Setup Tensors..." << std::endl;
+    electron::Tensor src1(backend, DT_INT8, Tensor::Shape { 2048 });
+    electron::Tensor src2(backend, DT_INT8, Tensor::Shape { 2048 });
+    electron::Tensor dst(backend, DT_INT8, Tensor::Shape { 2048 });
 
     int8_t * src1_ptr = (int8_t *)src1.get_dev_ptr();
     int8_t * src2_ptr = (int8_t *)src2.get_dev_ptr();
@@ -37,10 +38,11 @@ int main() {
     auto add_op = electron::operators::AddOp(backend, src1, src2, dst);
 
     // TODO: tensor.sync_device() (transfer data to device)
+    std::cout << "Running Operator..." << std::endl;
     add_op.exec();
     // TODO: tensor.sync_host() (transfer result back to host)
 
-
+    std::cout << "Checking Output..." << std::endl;
     for (size_t i = 0; i < 2048; i++) {
         int8_t a = (i % 32) - 32;
         int8_t b = (i % 64) - 32;
@@ -51,5 +53,6 @@ int main() {
         }
     }
 
+    std::cout << "Done!" << std::endl;
     return 0;
 }

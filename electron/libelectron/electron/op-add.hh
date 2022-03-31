@@ -9,9 +9,8 @@ class AddOp : public Operator {
 private:
     upcycle::WorkHandle handle;
 
-    void * g_args;
-    void * l_argss;
-
+    void * g_args_blob;
+    void * l_argss_blob;
 
 public:
     AddOp(
@@ -21,7 +20,6 @@ public:
         Tensor& dst);
 
     virtual void exec();
-
 
     virtual ~AddOp() {
         backend->free_workhandle(handle);
