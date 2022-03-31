@@ -2,7 +2,7 @@
 CC:=gcc
 CXX:=g++
 
-CXXOPTS:=
+CXXOPTS:=-std=c++1z
 COPTS:=
 
 DBGOPTS:=-g -O0
