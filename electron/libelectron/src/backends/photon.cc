@@ -11,7 +11,7 @@ namespace electron {
 
 PhotonBackend::PhotonBackend() :
     lib_handle{nullptr},
-    emu(std::make_shared<photon::PhotonEmu>()) { }
+    emu(std::make_shared<photon::PhotonEmu>(4)) { } // TODO: Get # tiles from environment or caller
 
 void PhotonBackend::loadlib(const std::string& filename) {
     assert(lib_handle == nullptr);
@@ -30,35 +30,16 @@ upcycle::KernelFunc PhotonBackend::getsym(const std::string& symname) const {
     return (upcycle::KernelFunc)sym;
 }
 
-
-upcycle::WorkHandle PhotonBackend::put_worklist(const upcycle::GlobalWorkList& gwl, const std::vector<upcycle::WorkList>& wl) {
-    //upcycle::WorkItem * wl_dev =
-    //    (upcycle::WorkItem *)std::malloc(wl.size(i) * sizeof(*wl_dev));
-    upcycle::GlobalWorkItem* dev_gwl = (upcycle::GlobalWorkItem *)std::malloc(gwl.size() * sizeof(upcycle::GlobalWorkItem));
-    upcycle::WorkItem ** dev_wl = (upcycle::WorkItem **)std::malloc(gwl.size * sizeof(*upcycle::WorkItem));
-
-    memcpy(dev_gwl,gwl.data(),gwl.size() * sizeof(*dev_gwl));
-
-    for(size_t i=0; i<gwl.size() ; i++){
-     dev_wl[i] = (upcycle::WorkItem *)std::malloc(2*sizeof(upcycle::WorkItem));
-     dev_wl[i][0] = wl[i][0]; //Pftch thread
-     dev_wl[i][1] = wl[i][1]; //Simd thread
-    }
-
-
-    //memcpy(wl_dev, wl.data(), wl.size() * sizeof(*wl_dev));
-
-    return std::make_pair((void *)dev_gwl, dev_gwl.size());
+upcycle::WorkHandle PhotonBackend::put_worklist(const upcycle::GlobalWorkList& gwl) {
+    return new photon::WorkHandle { gwl };
 }
-
 
 void PhotonBackend::enqueue(const WorkHandle& handle) {
     emu->enqueue(handle);
 }
 
-
-void PhotonBackend::free_workhandle(upcycle::WorkHandle& handle) {
-    std::free(handle.first);
+void PhotonBackend::free_workhandle(const upcycle::WorkHandle handle) {
+    delete ((photon::WorkHandle *)handle);
 }
 
 PhotonBackend::~PhotonBackend() {
