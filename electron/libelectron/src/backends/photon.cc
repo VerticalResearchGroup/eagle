@@ -11,7 +11,7 @@ namespace electron {
 
 PhotonBackend::PhotonBackend() :
     lib_handle{nullptr},
-    emu(std::make_shared<photon::PhotonEmu>(4)) { } // TODO: Get # tiles from environment or caller
+    emu(std::make_shared<photon::PhotonEmu>(4, 512)) { } // TODO: Get # tiles from environment or caller
 
 void PhotonBackend::loadlib(const std::string& filename) {
     assert(lib_handle == nullptr);
