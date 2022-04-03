@@ -28,8 +28,8 @@ public:
     virtual void sync_host(void * ptr) { }
     virtual void free(void * dev_ptr) { return std::free(dev_ptr); }
 
-    virtual size_t num_tiles() const { return emu->get_num_tiles(); }
-    virtual size_t vbitwidth() const { return 512; } // TODO
+    virtual size_t num_tiles() const { return emu->num_tiles; }
+    virtual size_t vbitwidth() const { return emu->vbitwidth; }
 
     virtual ~PhotonBackend();
 };
