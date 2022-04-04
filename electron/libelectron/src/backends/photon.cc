@@ -11,7 +11,7 @@ namespace electron {
 
 PhotonBackend::PhotonBackend() :
     lib_handle{nullptr},
-    emu(std::make_shared<photon::PhotonEmu>(4, 512)) {  // TODO: Get # tiles from environment or caller
+    emu(std::make_shared<photon::PhotonEmu>(4, 512)),  // TODO: Get # tiles from environment or caller
     allocator(std::make_shared<memory_mgmt::FirstFitAllocator>((unsigned long int) 8 * (1 << 30))),
     dev_base(mmap(NULL, (unsigned long int) 8 * (1 << 30), PROT_READ | PROT_WRITE, MAP_ANONYMOUS | MAP_SHARED, -1, 0))
 {
