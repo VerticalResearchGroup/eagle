@@ -12,7 +12,7 @@ whl: build
 	bazel-bin/tensorflow_plugin/tools/pip_package/build_pip_package .
 
 install: whl
-	pip install --no-deps --force-reinstall $(WHL)
+	pip install --no-deps --force-reinstall --no-cache-dir $(WHL)
 
 clean:
 	rm -f $(WHL)
