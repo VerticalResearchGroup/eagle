@@ -6,6 +6,7 @@
 
 #include "photon/photon-common.hh"
 #include "photon/photon-hooks.hh"
+#include "photon/photon-cache.hh"
 
 namespace photon {
 
@@ -105,13 +106,29 @@ struct TileEmu {
     UNARY_OP(vsigmoid_u8,  uint8_t, 64, arithmetic::sigmoid_u8)
     UNARY_OP(vsigmoid_fp16, half, 32, arithmetic::sigmoid_fp16)
 
-    inline void vld(uint8_t * addr, VREG_T& dst) {
-        hooks->on_mem_read(tile_id, (uintptr_t)addr);
-        memcpy(dst.bytes, addr, 64);
+    static inline void vld(uint8_t * addr, VREG_T& dst) {
+        assert(64 % BLOCK_SIZE == 0);
+        for (size_t i = 0; i < 64; i += BLOCK_SIZE) {
+            addr += i;
+            uint8_t * cl_addr = Cache::read(addr);
+            memcpy(dst.bytes + i, cl_addr, BLOCK_SIZE);
+        }
     }
 
     static inline void vst(uint8_t * addr, VREG_T& dst) {
         memcpy(addr, dst.bytes, 64);
+    }
+
+    static inline void prefetch(uint8_t * addr, size_t len) {
+        size_t i = 0;
+        for (i = len; i > BLOCK_SIZE; i -= BLOCK_SIZE) {
+            Cache::fetch(addr);
+            addr += BLOCK_SIZE;
+        }
+
+        if(i > 0) {
+            Cache::fetch(addr);
+        }
     }
 };
 

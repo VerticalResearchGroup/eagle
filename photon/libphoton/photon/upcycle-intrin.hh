@@ -90,17 +90,17 @@
 #define VFMA_FP16(acc, src1, src2)    photon::get_emu()->vfma_fp16(acc, src1, src2)
 
 // Unary / activation functions
-#define VSIGMOID_I8(reg)   photon::UpcycleEmu::vsigmoid_i8(reg)
-#define VSIGMOID_U8(reg)   photon::UpcycleEmu::vsigmoid_u8(reg)
-#define VSIGMOID_FP16(reg) photon::UpcycleEmu::vsigmoid_fp16(reg)
+#define VSIGMOID_I8(reg)   photon::get_emu()->vsigmoid_i8(reg)
+#define VSIGMOID_U8(reg)   photon::get_emu()->vsigmoid_u8(reg)
+#define VSIGMOID_FP16(reg) photon::get_emu()->vsigmoid_fp16(reg)
 
-#define VTANH_I8(reg)   photon::UpcycleEmu::vtanh_i8(reg)
-#define VTANH_U8(reg)   photon::UpcycleEmu::vtanh_u8(reg)
-#define VTANH_FP16(reg) photon::UpcycleEmu::vtanh_fp16(reg)
+#define VTANH_I8(reg)   photon::get_emu()->vtanh_i8(reg)
+#define VTANH_U8(reg)   photon::get_emu()->vtanh_u8(reg)
+#define VTANH_FP16(reg) photon::get_emu()->vtanh_fp16(reg)
 
-#define VRELU_I8(reg)   photon::UpcycleEmu::vrelu_i8(reg)
-#define VRELU_U8(reg)   photon::UpcycleEmu::vrelu_u8(reg)
-#define VRELU_FP16(reg) photon::UpcycleEmu::vrelu_fp16(reg)
+#define VRELU_I8(reg)   photon::get_emu()->vrelu_i8(reg)
+#define VRELU_U8(reg)   photon::get_emu()->vrelu_u8(reg)
+#define VRELU_FP16(reg) photon::get_emu()->vrelu_fp16(reg)
 
 // Vector load/store operations
 #define VLD(addr, reg) photon::get_emu()->vld((uint8_t *)addr, reg)
@@ -112,4 +112,4 @@
 #define VST(addr, reg) photon::get_emu()->vst((uint8_t *)addr, reg)
 
 // Prefetch core operations
-#define PREFETCH1(addr, len)
+#define PREFETCH1(addr, len) photon::get_emu()->prefetch((uint8_t *) addr, len)
