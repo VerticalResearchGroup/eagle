@@ -112,4 +112,4 @@
 #define VST(addr, reg) photon::UpcycleEmu::vst((uint8_t *)addr, reg)
 
 // Prefetch core operations
-#define PREFETCH1(addr, len)
+#define PREFETCH1(addr, len) photon::UpcycleEmu::prefetch((uint8_t *) addr, len)

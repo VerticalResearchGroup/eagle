@@ -4,6 +4,7 @@
 #include "stdint.h"
 
 #include "photon/photon-arith.hh"
+#include "photon/photon-cache.hh"
 
 namespace photon {
 
@@ -22,7 +23,7 @@ struct UpcycleEmu {
         return state;
     }
 
-#define BINARY_OP(name, dt, nelem, op) \
+    #define BINARY_OP(name, dt, nelem, op) \
     static inline void name(VREG_T& dst, VREG_T& src1, VREG_T& src2) { \
         dt * src1_ ## dt = (dt *)src1.bytes; \
         dt * src2_ ## dt = (dt *)src2.bytes; \
@@ -55,7 +56,7 @@ struct UpcycleEmu {
     BINARY_OP(vdivs_u8, uint8_t, 64, arithmetic::divs_u8)
     BINARY_OP(vdiv_fp16, half, 32, arithmetic::div_fp16)
 
-#define FMA_8_32_OP(name, dt_acc, dt_inp, add, mul) \
+    #define FMA_8_32_OP(name, dt_acc, dt_inp, add, mul) \
     static inline void name(VREG_T& acc, VREG_T& src1, VREG_T& src2) { \
         dt_inp * src1_ ## dt_inp = (dt_inp *)src1.bytes; \
         dt_inp * src2_ ## dt_inp = (dt_inp *)src2.bytes; \
@@ -100,11 +101,28 @@ struct UpcycleEmu {
     UNARY_OP(vsigmoid_fp16, half, 32, arithmetic::sigmoid_fp16)
 
     static inline void vld(uint8_t * addr, VREG_T& dst) {
-        memcpy(dst.bytes, addr, 64);
+        assert(64 % BLOCK_SIZE == 0);
+        for (size_t i = 0; i < 64; i += BLOCK_SIZE) {
+            addr += i;
+            uint8_t * cl_addr = Cache::read(addr);
+            memcpy(dst.bytes + i, cl_addr, BLOCK_SIZE);
+        }
     }
 
     static inline void vst(uint8_t * addr, VREG_T& dst) {
         memcpy(addr, dst.bytes, 64);
+    }
+
+    static inline void prefetch(uint8_t * addr, size_t len) {
+        size_t i = 0;
+        for (i = len; i > BLOCK_SIZE; i -= BLOCK_SIZE) {
+            Cache::fetch(addr);
+            addr += BLOCK_SIZE;
+        }
+
+        if(i > 0) {
+            Cache::fetch(addr);
+        }
     }
 };
 
