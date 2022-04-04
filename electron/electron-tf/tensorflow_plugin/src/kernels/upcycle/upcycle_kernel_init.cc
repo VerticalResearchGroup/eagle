@@ -4,7 +4,6 @@
 void RegisterDeviceKernels(const char* device_type) {
   RegisterDeviceRelu(device_type);
   RegisterDeviceAdd(device_type);
-  //RegisterDeviceRelu6(device_type);
-  RegisterDeviceBitcast(device_type);
+  RegisterDeviceRelu(device_type);
 
 }
