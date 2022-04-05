@@ -81,3 +81,37 @@ modport sender(output data, valid);
 modport receiver(input data, valid);
 
 endinterface:l1togluon_response
+
+/* Client to MRA interfaces
+   Clients include either of the L1-Caches or the Tile Control FSM
+*/
+interface l1tomra_request #(
+  parameter DATA_WIDTH = 512,
+  parameter ADDR_WIDTH = 64
+) (input clk, input rst_n);
+
+logic [ADDR_WIDTH-1:0]    addr;
+logic [DATA_WIDTH-1:0]    data;
+logic                     rw;
+logic                     valid;
+logic                     ready;
+
+modport sender (input ready,
+  output addr, data, rw, valid);
+
+modport receiver(output ready,
+  input addr, data, rw, valid);
+
+endinterface:l1tomra_request
+
+interface mratol1_response #(
+  parameter DATA_WIDTH = 512
+) (input clk, input rst_n);
+
+logic [DATA_WIDTH-1:0]    data;
+logic                     valid;
+
+modport sender(output data, valid);
+modport receiver(input data, valid);
+
+endinterface:mratol1_response
