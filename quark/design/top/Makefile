@@ -12,6 +12,6 @@ sim:
 
 all:
 	vlog -sv -svinputport=net -work work +incdir+../com/intf/ top_quark.sv
-	vsim work.top_quark 
+	vsim -c work.top_quark 
 	run 10ns
 	
