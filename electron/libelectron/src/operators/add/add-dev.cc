@@ -18,10 +18,11 @@ KERNEL(add_i8, AddGArgs, AddLArgs) {
     char * src1 = ((char *)g_args->src1) + l_args->off;
     char * src2 = ((char *)g_args->src2) + l_args->off;
     char * dst = ((char *)g_args->dst) + l_args->off;
+    size_t left = l_args->len; // Bytes left for the instruction
 
-    SIMD_SET_MASK(VLEN_MAX_I8 - 1);
+    SIMD_SET_MASK((1 << VLEN_MAX_I8) - 1);
 
-    for (size_t left = l_args->len; left > VLEN_MAX_I8; left -= VLEN_MAX_I8) {
+    for (; left > VLEN_MAX_I8; left -= VLEN_MAX_I8) {
         VLD(src1, V0);
         VLD(src2, V1);
         VADD_I8(V2, V0, V1);
@@ -44,10 +45,11 @@ KERNEL(add_u8, AddGArgs, AddLArgs) {
     char * src1 = ((char *)g_args->src1) + l_args->off;
     char * src2 = ((char *)g_args->src2) + l_args->off;
     char * dst = ((char *)g_args->dst) + l_args->off;
+    size_t left = l_args->len; // bytes left for the instruction
 
-    SIMD_SET_MASK(VLEN_MAX_U8 - 1);
+    SIMD_SET_MASK((1 << VLEN_MAX_U8) - 1);
 
-    for (size_t left = l_args->len; left > VLEN_MAX_U8; left -= VLEN_MAX_U8) {
+    for (; left > VLEN_MAX_U8; left -= VLEN_MAX_U8) {
         VLD(src1, V0);
         VLD(src2, V1);
         VADD_U8(V2, V0, V1);
