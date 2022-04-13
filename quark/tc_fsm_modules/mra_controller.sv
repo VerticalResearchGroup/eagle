@@ -84,28 +84,28 @@ module mra_controller#(
 
    // **MRA CONTROLLER FSM**
    // state machine states
-	typedef enum logic {IDLE, REQ_WL} state_t;
-	state_t state,nxt_state;
+   typedef enum logic {IDLE, REQ_WL} state_t;
+   state_t state,nxt_state;
 
-	// infer state flops
-	always @(posedge clk or negedge rst_n) begin
-		if (!rst_n)
-			state <= IDLE;
-		else
-			state <= nxt_state;
-	end
+   // infer state flops
+   always @(posedge clk or negedge rst_n) begin
+      if (!rst_n)
+         state <= IDLE;
+      else
+	 state <= nxt_state;
+   end
 			
-	// state machine combinational logic
-	always_comb begin
-		// set default values
-		en_dp_load = 1'b0;
-		dec_req_remain = 1'b0;
-		MRA_req_valid = 1'b0;
-		inc_MRA_req_addr = 1'b0;
-		nxt_state = IDLE;
+   // state machine combinational logic
+   always_comb begin
+      // set default values
+      en_dp_load = 1'b0;
+      dec_req_remain = 1'b0;
+      MRA_req_valid = 1'b0;
+      inc_MRA_req_addr = 1'b0;
+      nxt_state = IDLE;
 		
-		case (state)
-			REQ_WL: begin
+      case (state)
+         REQ_WL: begin
             if(dp_req_done)begin
                nxt_state = IDLE;
             end else begin // !dp_req_done
@@ -116,15 +116,15 @@ module mra_controller#(
                   inc_MRA_req_addr = 1'b1;
                end
             end
-			end
-			default: begin // IDLE
+         end
+         default: begin // IDLE
             if(start_dispatch)begin
                en_dp_load = 1'b1;
                nxt_state = REQ_WL;
             end else begin
                nxt_state = IDLE;
             end
-			end
-		endcase
+         end
+      endcase
    end
 endmodule
