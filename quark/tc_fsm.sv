@@ -14,6 +14,10 @@ module tc_fsm #(
    parameter DATA_WIDTH = 512,
    parameter WL_LEN_BITS = 8)(
 
+   // GLOBAL SIGNALS
+   input                        clk,
+   input                        rst,
+
    // MRA INTERFACE
 
    output      [ADDR_WIDTH-1:0] MRA_req_addr,
