@@ -36,7 +36,7 @@ modport receiver(input data, valid);
 
 endinterface:l1tocore_response
 
-//prefetc response - single bitbusy signal
+//prefetch response - single bitbusy signal
 interface prefetch_response (input clk, input rst_n);
 
 logic busy;
