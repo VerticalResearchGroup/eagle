@@ -8,10 +8,10 @@ namespace electron {
 
 class Operator {
 protected:
-    const std::shared_ptr<Backend> backend;
+    const Ptr<Backend> backend;
 
 public:
-    Operator(const std::shared_ptr<Backend>& _backend) : backend(_backend) {}
+    Operator(Ptr<Backend> _backend) : backend(_backend) {}
 
     virtual void exec() = 0;
 

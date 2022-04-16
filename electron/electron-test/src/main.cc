@@ -3,7 +3,7 @@
 #include <sstream>
 
 #include "electron/electron.hh"
-#include "electron/op-add.hh"
+#include "electron/op-elemwise.hh"
 
 using namespace electron;
 
