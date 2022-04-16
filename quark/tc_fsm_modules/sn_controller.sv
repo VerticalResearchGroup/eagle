@@ -1,7 +1,7 @@
 module sn_controller#(
    // PARAMETERS
    parameter ADDR_WIDTH = 64,
-   parameter WL_LEN_BITS = 8
+   parameter WL_LEN_BITS = 32
 )(
    // SN Interface
    input                        SN_next_op,
