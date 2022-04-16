@@ -20,6 +20,9 @@ static size_t dtype_size(DataType dtype) {
     }
 }
 
+template<typename T>
+using Ptr = std::shared_ptr<T>;
+
 
 }
 
