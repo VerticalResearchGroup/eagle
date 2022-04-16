@@ -1,17 +1,12 @@
-#include "electron/op-add.hh"
-#include "operators/add/add-dev.hh"
+#include "electron/op-elemwise.hh"
+#include "operators/elemwise/elemwise-dev.hh"
 
 using namespace upcycle;
 
 
 namespace electron::operators {
 
-AddOp::AddOp(
-    const std::shared_ptr<Backend>& _backend,
-    Tensor& src1,
-    Tensor& src2,
-    Tensor& dst) : Operator(_backend)
-{
+void ElemwiseBinOp::setup(Tensor& src1, Tensor& src2, Tensor& dst) {
     const size_t num_tiles = backend->num_tiles();
     GlobalWorkList gwl(num_tiles);
 
@@ -25,31 +20,22 @@ AddOp::AddOp(
     assert(src2.num_elem() == num_elems);
     assert(dst.num_elem() == num_elems);
 
-    KernelFunc kern = nullptr;
-    KernelFunc prefetch = nullptr;
-    size_t vlen = vlen = backend->vbitwidth() / 8 / dtype_size(dtype);
-
-    switch (dtype) {
-    case DT_INT8:
-        kern = backend->getsym("add_i8_simd");
-        prefetch = backend->getsym("add_i8_prefetch");
-        break;
-
-    default:
-        assert(false);
-    }
+    KernelFunc kern = pf_kern(dtype);
+    KernelFunc prefetch = simd_kern(dtype);
 
     assert(kern != nullptr);
     assert(prefetch != nullptr);
 
+    size_t vlen = vlen = backend->vbitwidth() / 8 / dtype_size(dtype);
+
     const size_t blk_size = 64; // TODO: should be sized to L1
     const size_t num_blks = (num_elems + blk_size - 1) / blk_size;
 
-    g_args_blob = backend->malloc(sizeof(device::AddGArgs));
-    l_argss_blob = backend->malloc(num_blks * sizeof(device::AddLArgs));
+    g_args_blob = backend->malloc(sizeof(device::ElemwiseBinGArgs));
+    l_argss_blob = backend->malloc(num_blks * sizeof(device::ElemwiseLArgs));
 
-    device::AddGArgs * g_args = (device::AddGArgs *)g_args_blob;
-    device::AddLArgs * l_argss = (device::AddLArgs *)l_argss_blob;
+    device::ElemwiseBinGArgs * g_args = (device::ElemwiseBinGArgs *)g_args_blob;
+    device::ElemwiseLArgs * l_argss = (device::ElemwiseLArgs *)l_argss_blob;
 
     g_args->src1 = src1.get_dev_ptr();
     g_args->src2 = src2.get_dev_ptr();
@@ -58,7 +44,7 @@ AddOp::AddOp(
     size_t off = 0;
 
     for (size_t i = 0; i < num_blks; i++) {
-        l_argss[i] = device::AddLArgs {
+        l_argss[i] = device::ElemwiseLArgs {
             .off = off, .len = std::min(blk_size, num_elems - off) };
 
         gwl[i % num_tiles].push_back(upcycle::WorkItem {
@@ -72,7 +58,7 @@ AddOp::AddOp(
     handle = backend->put_worklist(gwl);
 }
 
-void AddOp::exec() {
+void ElemwiseBinOp::exec() {
     backend->enqueue(handle);
 }
 

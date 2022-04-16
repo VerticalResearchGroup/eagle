@@ -3,13 +3,18 @@
 
 namespace electron::operators::device {
 
-struct AddGArgs {
+struct ElemwiseUnGArgs {
+    void * src1;
+    void * dst;
+};
+
+struct ElemwiseBinGArgs {
     void * src1;
     void * src2;
     void * dst;
 };
 
-struct AddLArgs {
+struct ElemwiseLArgs {
     size_t off;
     size_t len;
 };
