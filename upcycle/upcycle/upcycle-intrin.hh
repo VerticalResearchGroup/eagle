@@ -1,14 +1,15 @@
 #pragma once
 
-#if !defined(__EMU__) && !defined(__QUARK__)
-// Here we just define the intrinsic operations to allow user code to at least
-// compile / report errors.
-
+#define VMASK_ENABLE_ALL 0xffff'ffff'ffff'ffffULL
 #define VLEN_MAX_I8 64
 #define VLEN_MAX_U8 64
 #define VLEN_MAX_FP16 32
 #define VLEN_MAX_I32 16
 #define VLEN_MAX_U32 16
+
+#if !defined(__EMU__) && !defined(__QUARK__)
+// Here we just define the intrinsic operations to allow user code to at least
+// compile / report errors.
 
 // GP vector registers
 #define V0 0

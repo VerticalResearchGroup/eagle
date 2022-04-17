@@ -3,9 +3,9 @@
 namespace electron {
 
 enum DataType {
-    DT_INT8,
-    DT_UINT8,
-    DT_FP16
+    DT_INT8 = 0,
+    DT_UINT8 = 1,
+    DT_FP16 = 2
 };
 
 static size_t dtype_size(DataType dtype) {

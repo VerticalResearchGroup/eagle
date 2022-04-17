@@ -1,15 +1,6 @@
 #pragma once
 #include "photon/photon.hh"
 
-// Here we just define the intrinsic operations to allow user code to at least
-// compile / report errors.
-
-#define VLEN_MAX_I8 64
-#define VLEN_MAX_U8 64
-#define VLEN_MAX_FP16 32
-#define VLEN_MAX_I32 16
-#define VLEN_MAX_U32 16
-
 // GP vector registers
 #define V0 photon::get_emu()->gp_regs[0]
 #define V1 photon::get_emu()->gp_regs[1]
@@ -55,7 +46,7 @@
 #define T7 photon::get_emu()->t_regs[7]
 #define T8 photon::get_emu()->t_regs[8]
 
-#define SIMD_SET_MASK(mask) // TODO
+#define SIMD_SET_MASK(mask) photon::get_emu()->simd_set_mask(mask)
 
 // Vector Binary operations
 #define VADD_I8(dst, src1, src2)   photon::get_emu()->vadd_i8(dst, src1, src2)
