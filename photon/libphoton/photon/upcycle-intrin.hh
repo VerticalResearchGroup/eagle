@@ -55,7 +55,7 @@
 #define T7 photon::get_emu()->t_regs[7]
 #define T8 photon::get_emu()->t_regs[8]
 
-#define SIMD_SET_MASK(mask) // TODO
+#define SIMD_SET_MASK(mask) photon::get_emu()->simd_set_mask(mask)
 
 // Vector Binary operations
 #define VADD_I8(dst, src1, src2)   photon::get_emu()->vadd_i8(dst, src1, src2)
