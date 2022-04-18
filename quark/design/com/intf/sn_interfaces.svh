@@ -13,12 +13,13 @@ logic                     op;
 logic [TILE_WIDTH-1:0]    tile;
 logic [ADDR_WIDTH-1:0]    addr;
 logic [WL_LEN_BITS-1:0]   len;
+logic                     ack;
 logic                     done;
 
-modport sender (input done,
+modport sender (input ack, done,
   output op, tile, addr, len);
 
-modport receiver(output done,
+modport receiver(output ack, done,
   input op, tile, addr, len);
 
 endinterface:sn_ring_msg
