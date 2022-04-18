@@ -1,6 +1,6 @@
 
 comp: top_mem_sys.sv
-	vlog -sv -svinputport=net -work work +incdir+../com/intf/ *.sv *.v
+	vlog -sv -svinputport=net -work work +incdir+../com/intf/+l1/+l2/+mra/ *.sv 
 
 sim: 
 	#quit -sim
