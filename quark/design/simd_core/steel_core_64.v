@@ -42,15 +42,15 @@ SOFTWARE.
 
 // CSR registers reset values
 
-`define MCYCLE_RESET        32'h00000000
-`define TIME_RESET          32'h00000000
-`define MINSTRET_RESET      32'h00000000
-`define MCYCLEH_RESET       32'h00000000
-`define TIMEH_RESET         32'h00000000
-`define MINSTRETH_RESET     32'h00000000
-`define MTVEC_RESET         32'h00000000
-`define MSCRATCH_RESET      32'h00000000
-`define MEPC_RESET          32'h00000000
+`define MCYCLE_RESET        64'h0000000000000000
+`define TIME_RESET          64'h0000000000000000
+`define MINSTRET_RESET      64'h0000000000000000
+`define MCYCLEH_RESET       64'h0000000000000000
+`define TIMEH_RESET         64'h0000000000000000
+`define MINSTRETH_RESET     64'h0000000000000000
+`define MTVEC_RESET         64'h0000000000000000
+`define MSCRATCH_RESET      64'h0000000000000000
+`define MEPC_RESET          64'h0000000000000000
 `define MCOUNTINHIBIT_CY_RESET  1'b0 
 `define MCOUNTINHIBIT_IR_RESET  1'b0
 
@@ -191,9 +191,9 @@ SOFTWARE.
 
 // mask for byte-writes
 
-`define WR_MASK_BYTE          4'b0001
-`define WR_MASK_HALF          4'b0011
-`define WR_MASK_WORD          4'b1111
+`define WR_MASK_BYTE          8'b00000001
+`define WR_MASK_HALF          8'b00000011
+`define WR_MASK_WORD          8'b00001111
 
 // load unit control encoding
 
@@ -269,7 +269,7 @@ module steel_core_top_64 #(
     output wire [`ADDR_WIDTH-1:0] D_ADDR,
     output wire [`DATA_WIDTH-1:0] DATA_OUT,
     output wire WR_REQ,
-    output wire [3:0] WR_MASK,
+    output wire [7:0] WR_MASK,
     input wire [`DATA_WIDTH-1:0] DATA_IN,
     
     //connections with Interrupt Controller
@@ -312,10 +312,10 @@ module steel_core_top_64 #(
     wire [6:0] OPCODE;
     wire [6:0] FUNCT7;
     wire [2:0] FUNCT3;
-    wire [3:0] ALU_OPCODE;
-    reg [3:0] ALU_OPCODE_reg;
+    wire [5:0] ALU_OPCODE;
+    reg [5:0] ALU_OPCODE_reg;
     wire MEM_WR_REQ;
-    wire [3:0] MEM_WR_MASK;
+    wire [7:0] MEM_WR_MASK;
     wire [1:0] LOAD_SIZE;
     reg [1:0] LOAD_SIZE_reg;
     wire LOAD_UNSIGNED;
@@ -357,7 +357,7 @@ module steel_core_top_64 #(
     reg [`DATA_WIDTH-1:0] WB_MUX_OUT;
     wire [`DATA_WIDTH-1:0] SU_DATA_OUT;
     wire [`ADDR_WIDTH-1:0] SU_D_ADDR;
-    wire [3:0] SU_WR_MASK;
+    wire [7:0] SU_WR_MASK;
     wire SU_WR_REQ;
     wire TRAP_TAKEN;
     wire MISALIGNED_EXCEPTION;
@@ -399,7 +399,7 @@ module steel_core_top_64 #(
     
     assign OPCODE = INSTR_mux[6:0];
     assign FUNCT3 = INSTR_mux[14:12];
-    assign FUNCT7 = INSTR_mux[31:25];
+    assign FUNCT7 = INSTR_mux[`INSTR_WIDTH-1:25];
     
     store_unit su(
 
@@ -482,7 +482,7 @@ module steel_core_top_64 #(
 
     );
     
-    assign CSR_ADDR = INSTR_mux[31:20]; 
+    assign CSR_ADDR = INSTR_mux[`INSTR_WIDTH-1:20]; 
     //TODO: Check if any changes are needed 
     csr_file csrf(
 
@@ -584,7 +584,7 @@ module steel_core_top_64 #(
             PC_reg <= BOOT_ADDRESS;
             PC_PLUS_4_reg <= `ADDR_WIDTH'('h00000000);
             IADDER_OUT_reg <= `ADDR_WIDTH'('h00000000);
-            ALU_OPCODE_reg <= 4'b0000;
+            ALU_OPCODE_reg <= 6'b000000;
             LOAD_SIZE_reg <= 2'b00;
             LOAD_UNSIGNED_reg <= 1'b0;
             ALU_SRC_reg <= 1'b0;
@@ -625,7 +625,7 @@ module steel_core_top_64 #(
         .LOAD_SIZE(LOAD_SIZE_reg),
         .LOAD_UNSIGNED(LOAD_UNSIGNED_reg),
         .DATA_IN(DATA_IN),
-        .IADDER_OUT_1_TO_0(IADDER_OUT_reg[1:0]),
+        .IADDER_OUT_2_TO_0(IADDER_OUT_reg[2:0]),
         .OUTPUT(LU_OUTPUT)
     
     );
@@ -666,13 +666,13 @@ module steel_core_top_64 #(
     assign DATA_OUT = SU_DATA_OUT;
     
 endmodule
-
+// TODO: implement ADDW, ADDIW, etc.
 module alu(
 
     input wire [`DATA_WIDTH-1:0] OP_1,
     input wire [`DATA_WIDTH-1:0] OP_2,
-    input wire [3:0] OPCODE,
-    output reg [`DATA_WIDTH-1:0] RESULT
+    input wire [5:0] OPCODE,
+    output wire [`DATA_WIDTH-1:0] RESULT
 
     );
     
@@ -684,8 +684,18 @@ module alu(
     wire [`DATA_WIDTH-1:0] shr_result;
     wire slt_result;
     wire sltu_result;
-    
+
+    wire [31:0] word_op1;
+    wire [31:0] word_op2;
+    wire signed [31:0] signed_word_op1;
+    wire signed [31:0] adder_word_op2;
+    wire [31:0] minus_word_op2;
+    wire [31:0] sra_word_result;
+    wire [31:0] srl_word_result;
+    wire [31:0] shr_word_result;
+
     reg [`DATA_WIDTH-1:0] pre_result;    
+    reg [31:0] pre_word_result; 
     
     assign signed_op1 = OP_1;
     assign minus_op2 = -OP_2;
@@ -696,23 +706,48 @@ module alu(
     assign sltu_result = OP_1 < OP_2;
     assign slt_result = OP_1[`DATA_WIDTH-1] ^ OP_2[`DATA_WIDTH-1] ? OP_1[`DATA_WIDTH-1] : sltu_result;
 
+    assign word_op1 = OP_1[31:0];
+    assign word_op2 = OP_2[31:0];
+
+    assign signed_word_op1 = word_op1;
+    assign minus_word_op2 = -word_op2;
+    assign adder_word_op2 = OPCODE[5] == 1'b1 ? minus_word_op2 : word_op2;
+    assign sra_word_result = signed_word_op1 >>> OP_2[4:0];
+    assign srl_word_result = word_op1 >> OP_2[4:0];
+    assign shr_word_result = OPCODE[5] == 1'b1 ? sra_word_result : srl_word_result;
+
     always @*
     begin
     
         case(OPCODE[2:0])
         
-            `FUNCT3_ADD: RESULT = OP_1 + adder_op2;
-            `FUNCT3_SRL: RESULT = shr_result;
-            `FUNCT3_OR: RESULT = OP_1 | OP_2;
-            `FUNCT3_AND: RESULT = OP_1 & OP_2;            
-            `FUNCT3_XOR: RESULT = OP_1 ^ OP_2;
-            `FUNCT3_SLT: RESULT = {(`DATA_WIDTH-1)'('b0), slt_result};
-            `FUNCT3_SLTU: RESULT = {(`DATA_WIDTH-1)'('b0), sltu_result};
-            `FUNCT3_SLL: RESULT = OP_1 << OP_2[4:0];
+            `FUNCT3_ADD: pre_result = OP_1 + adder_op2;
+            `FUNCT3_SRL: pre_result = shr_result;
+            `FUNCT3_OR: pre_result = OP_1 | OP_2;
+            `FUNCT3_AND: pre_result = OP_1 & OP_2;            
+            `FUNCT3_XOR: pre_result = OP_1 ^ OP_2;
+            `FUNCT3_SLT: pre_result = {(`DATA_WIDTH-1)'('b0), slt_result};
+            `FUNCT3_SLTU: pre_result = {(`DATA_WIDTH-1)'('b0), sltu_result};
+            `FUNCT3_SLL: pre_result = OP_1 << OP_2[4:0];
             
         endcase
     
     end
+
+    always @*
+    begin
+    
+        case(OPCODE[2:0])
+        
+            `FUNCT3_ADD: pre_word_result = word_op1 + adder_word_op2;
+            `FUNCT3_SRL: pre_word_result = shr_word_result;
+            `FUNCT3_SLL: pre_word_result = word_op1 << OP_2[4:0];
+            
+        endcase
+    
+    end
+
+    assign RESULT = OPCODE[4] ? {{32{pre_word_result[31]}},pre_word_result} : pre_result;
     
 endmodule
 
@@ -821,17 +856,19 @@ module store_unit(
     input wire MEM_WR_REQ,
     output reg [`DATA_WIDTH-1:0] DATA_OUT,
     output wire [`ADDR_WIDTH-1:0] D_ADDR,
-    output reg [3:0] WR_MASK,
+    output reg [7:0] WR_MASK,
     output wire WR_REQ
     
     );   
     
-    reg [3:0] half_wr_mask;
-    reg [3:0] byte_wr_mask;
-    reg [31:0] half_dout;
-    reg [31:0] byte_dout;
+    reg [7:0] word_wr_mask;
+    reg [7:0] half_wr_mask;
+    reg [7:0] byte_wr_mask;
+    reg [`DATA_WIDTH-1:0] word_dout;
+    reg [`DATA_WIDTH-1:0] half_dout;
+    reg [`DATA_WIDTH-1:0] byte_dout;
     
-    assign D_ADDR = {IADDER_OUT[`DATA_WIDTH-1:4], 4'b0};
+    assign D_ADDR = {IADDER_OUT[`DATA_WIDTH-1:3], 3'b0};
     assign WR_REQ = MEM_WR_REQ;
     
     always @*
@@ -841,7 +878,7 @@ module store_unit(
         
             2'b00: WR_MASK = byte_wr_mask;
             2'b01: WR_MASK = half_wr_mask;
-            2'b10: WR_MASK = {4{MEM_WR_REQ}};
+            2'b10: WR_MASK = word_wr_mask;
             2'b11: WR_MASK = {4{MEM_WR_REQ}};
             
         endcase
@@ -855,7 +892,7 @@ module store_unit(
         
             2'b00: DATA_OUT = byte_dout;
             2'b01: DATA_OUT = half_dout;
-            2'b10: DATA_OUT = RS2;
+            2'b10: DATA_OUT = word_dout;
             2'b11: DATA_OUT = RS2;
             
         endcase
@@ -865,12 +902,16 @@ module store_unit(
     always @*
     begin
     
-        case(IADDER_OUT[1:0])
+        case(IADDER_OUT[2:0])
         
-            2'b00: byte_dout = {24'b0, RS2[7:0]};
-            2'b01: byte_dout = {16'b0, RS2[7:0], 8'b0};
-            2'b10: byte_dout = {8'b0, RS2[7:0], 16'b0};
-            2'b11: byte_dout = {RS2[7:0], 24'b0};
+            3'b000: byte_dout = {56'b0, RS2[7:0]};
+            3'b001: byte_dout = {48'b0, RS2[7:0], 8'b0};
+            3'b010: byte_dout = {40'b0, RS2[7:0], 16'b0};
+            3'b011: byte_dout = {32'b0, RS2[7:0], 24'b0};
+            3'b100: byte_dout = {24'b0, RS2[7:0], 32'b0};
+            3'b101: byte_dout = {16'b0, RS2[7:0], 40'b0};
+            3'b110: byte_dout = {8'b0, RS2[7:0], 48'b0};
+            3'b111: byte_dout = {RS2[7:0], 56'b0};
             
         endcase
     
@@ -879,12 +920,16 @@ module store_unit(
     always @*
     begin
     
-        case(IADDER_OUT[1:0])
+        case(IADDER_OUT[2:0])
         
-            2'b00: byte_wr_mask = {3'b0, MEM_WR_REQ};
-            2'b01: byte_wr_mask = {2'b0, MEM_WR_REQ, 1'b0};
-            2'b10: byte_wr_mask = {1'b0, MEM_WR_REQ, 2'b0};
-            2'b11: byte_wr_mask = {MEM_WR_REQ, 3'b0};
+            3'b000: byte_wr_mask = {7'b0, MEM_WR_REQ};
+            3'b001: byte_wr_mask = {6'b0, MEM_WR_REQ, 1'b0};
+            3'b010: byte_wr_mask = {5'b0, MEM_WR_REQ, 2'b0};
+            3'b011: byte_wr_mask = {4'b0, MEM_WR_REQ, 3'b0};
+            3'b100: byte_wr_mask = {3'b0, MEM_WR_REQ, 4'b0};
+            3'b101: byte_wr_mask = {2'b0, MEM_WR_REQ, 5'b0};
+            3'b110: byte_wr_mask = {1'b0, MEM_WR_REQ, 6'b0};
+            3'b111: byte_wr_mask = {MEM_WR_REQ, 7'b0};
             
         endcase
     
@@ -893,10 +938,12 @@ module store_unit(
     always @*
     begin
     
-        case(IADDER_OUT[1])
+        case(IADDER_OUT[2:1])
         
-            1'b0: half_dout = {16'b0, RS2[15:0]};
-            1'b1: half_dout = {RS2[15:0], 16'b0};
+            2'b00: half_dout = {48'b0, RS2[15:0]};
+            2'b01: half_dout = {32'b0, RS2[15:0], 16'b0};
+            2'b10: half_dout = {16'b0, RS2[15:0], 32'b0};
+            2'b11: half_dout = {RS2[15:0], 48'b0};
             
         endcase
     
@@ -905,10 +952,36 @@ module store_unit(
     always @*
     begin
     
-        case(IADDER_OUT[1])
+        case(IADDER_OUT[2:1])
         
-            1'b0: half_wr_mask = {2'b0, {2{MEM_WR_REQ}}};
-            1'b1: half_wr_mask = {{2{MEM_WR_REQ}}, 2'b0};
+            2'b00: half_wr_mask = {6'b0, {2{MEM_WR_REQ}}};
+            2'b01: half_wr_mask = {4'b0, {2{MEM_WR_REQ}}, 2'b0};
+            2'b10: half_wr_mask = {2'b0, {2{MEM_WR_REQ}}, 4'b0};
+            2'b11: half_wr_mask = {{2{MEM_WR_REQ}}, 6'b0};
+            
+        endcase
+    
+    end
+
+    always @*
+    begin
+    
+        case(IADDER_OUT[2])
+        
+            1'b0: word_dout = {32'b0, RS2[31:0]};
+            1'b1: word_dout = {RS2[31:0], 32'b0};
+            
+        endcase
+    
+    end
+
+    always @*
+    begin
+    
+        case(IADDER_OUT[2])
+        
+            1'b0: word_wr_mask = {4'b0, {4{MEM_WR_REQ}}};
+            1'b1: word_wr_mask = {{4{MEM_WR_REQ}}, 4'b0};
             
         endcase
     
@@ -966,28 +1039,28 @@ module csr_file(
     );
 
     // Machine trap setup
-    wire [31:0] mstatus; // machine status register
-    wire [31:0] misa; // machine ISA register
-    wire [31:0] mie_reg; // machine interrupt enable register
-    wire [31:0] mtvec;
+    wire [`ADDR_WIDTH-1:0] mstatus; // machine status register
+    wire [`ADDR_WIDTH-1:0] misa; // machine ISA register
+    wire [`ADDR_WIDTH-1:0] mie_reg; // machine interrupt enable register
+    wire [`ADDR_WIDTH-1:0] mtvec;
     wire [1:0] mxl; // machine XLEN
     wire [25:0] mextensions; // ISA extensions
     reg [1:0] mtvec_mode; // machine trap mode
-    reg [29:0] mtvec_base; // machine trap base address
+    reg [61:0] mtvec_base; // machine trap base address
     reg mpie; // mach. prior interrupt enable
     reg meie; // mach. external interrupt enable
     reg mtie; // mach. timer interrupt enable
     reg msie; // mach. software interrupt enable
 
     // Machine trap handling
-    reg [31:0] mscratch; // machine scratch register
-    reg [31:0] mepc; // machine exception program counter
-    reg [31:0] mtval; // machine trap value register
-    wire [31:0] mcause; // machine trap cause register
-    wire [31:0] mip_reg; // machine interrupt pending register
+    reg [`ADDR_WIDTH-1:0] mscratch; // machine scratch register
+    reg [`ADDR_WIDTH-1:0] mepc; // machine exception program counter
+    reg [`ADDR_WIDTH-1:0] mtval; // machine trap value register
+    wire [`ADDR_WIDTH-1:0] mcause; // machine trap cause register
+    wire [`ADDR_WIDTH-1:0] mip_reg; // machine interrupt pending register
     reg int_or_exc; // interrupt or exception signal
     reg [3:0] cause; // interrupt cause
-    reg [26:0] cause_rem; // remaining bits of mcause register 
+    reg [58:0] cause_rem; // remaining bits of mcause register 
     reg meip; // mach. external interrupt pending
     reg mtip; // mach. timer interrupt pending
     reg msip; // mach. software interrupt pending
@@ -998,7 +1071,7 @@ module csr_file(
     reg [63:0] minstret;
 
     // Machine counters setup
-    wire [31:0] mcountinhibit;
+    wire [`ADDR_WIDTH-1:0] mcountinhibit;
     reg mcountinhibit_cy;
     reg mcountinhibit_ir;
 
@@ -1023,14 +1096,11 @@ module csr_file(
     always @*
     begin
         case(CSR_ADDR)
-            `MARCHID:       CSR_DATA_OUT = 32'h00000018; // Decimal value: 24
-            `MIMPID:        CSR_DATA_OUT = 32'h00000001; // First version
-            `CYCLE:         CSR_DATA_OUT = mcycle[31:0];
-            `CYCLEH:        CSR_DATA_OUT = mcycle[63:32];
-            `TIME:          CSR_DATA_OUT = mtime[31:0];
-            `TIMEH:         CSR_DATA_OUT = mtime[63:32];
-            `INSTRET:       CSR_DATA_OUT = minstret[31:0];
-            `INSTRETH:      CSR_DATA_OUT = minstret[63:32];
+            `MARCHID:       CSR_DATA_OUT = 64'h00000018; // Decimal value: 24
+            `MIMPID:        CSR_DATA_OUT = 64'h00000001; // First version
+            `CYCLE:         CSR_DATA_OUT = mcycle[`ADDR_WIDTH-1:0];
+            `TIME:          CSR_DATA_OUT = mtime[`ADDR_WIDTH-1:0];
+            `INSTRET:       CSR_DATA_OUT = minstret[`ADDR_WIDTH-1:0];
             `MSTATUS:       CSR_DATA_OUT = mstatus;
             `MISA:          CSR_DATA_OUT = misa;
             `MIE:           CSR_DATA_OUT = mie_reg;
@@ -1040,18 +1110,16 @@ module csr_file(
             `MCAUSE:        CSR_DATA_OUT = mcause;
             `MTVAL:         CSR_DATA_OUT = mtval;
             `MIP:           CSR_DATA_OUT = mip_reg;
-            `MCYCLE:        CSR_DATA_OUT = mcycle[31:0];
-            `MCYCLEH:       CSR_DATA_OUT = mcycle[63:32];
-            `MINSTRET:      CSR_DATA_OUT = minstret[31:0];
-            `MINSTRETH:     CSR_DATA_OUT = minstret[63:32];
+            `MCYCLE:        CSR_DATA_OUT = mcycle[`ADDR_WIDTH-1:0];
+            `MINSTRET:      CSR_DATA_OUT = minstret[`ADDR_WIDTH-1:0];
             `MCOUNTINHIBIT: CSR_DATA_OUT = mcountinhibit;
-            default:        CSR_DATA_OUT = 32'b0;
+            default:        CSR_DATA_OUT = 64'b0;
         endcase
     end
 
     // MSTATUS register
     //                       MPP           
-    assign mstatus = {19'b0, 2'b11, 3'b0, mpie, 3'b0 , MIE, 3'b0};
+    assign mstatus = {51'b0, 2'b11, 3'b0, mpie, 3'b0 , MIE, 3'b0};
     always @(posedge CLK)
     begin
         if(RESET)
@@ -1077,12 +1145,12 @@ module csr_file(
     end
 
     // MISA register
-    assign mxl = 2'b01;
+    assign mxl = 2'b10;
     assign mextensions = 26'b00000000000000000100000000;
-    assign misa = {mxl, 4'b0, mextensions};
+    assign misa = {mxl, 36'b0, mextensions};
 
     // MIE register
-    assign mie_reg = {20'b0, meie, 3'b0, mtie, 3'b0, msie, 3'b0};
+    assign mie_reg = {52'b0, meie, 3'b0, mtie, 3'b0, msie, 3'b0};
     assign MEIE_OUT = meie;
     assign MTIE_OUT = mtie;
     assign MSIE_OUT = msie;
@@ -1104,10 +1172,10 @@ module csr_file(
     
     // MTVEC register
     assign mtvec = {mtvec_base, mtvec_mode};
-    wire [31:0] trap_mux_out;
-    wire [31:0] vec_mux_out;
-    wire [31:0] base_offset;
-    wire [31:0] mtvec_reset_value = `MTVEC_RESET;
+    wire [`ADDR_WIDTH-1:0] trap_mux_out;
+    wire [`ADDR_WIDTH-1:0] vec_mux_out;
+    wire [`ADDR_WIDTH-1:0] base_offset;
+    wire [`ADDR_WIDTH-1:0] mtvec_reset_value = `MTVEC_RESET;
     assign base_offset = CAUSE_IN << 2;
     assign trap_mux_out = I_OR_E ? vec_mux_out : {mtvec_base, 2'b00};
     assign vec_mux_out = mtvec[0] ? {mtvec_base, 2'b00} + base_offset : {mtvec_base, 2'b00};
@@ -1117,12 +1185,12 @@ module csr_file(
         if(RESET)
         begin
             mtvec_mode <= mtvec_reset_value[1:0];
-            mtvec_base <= mtvec_reset_value[31:2];
+            mtvec_base <= mtvec_reset_value[`ADDR_WIDTH-1:2];
         end
         else if(CSR_ADDR == `MTVEC && WR_EN)
         begin            
             mtvec_mode <= data_wr[1:0];
-            mtvec_base <= data_wr[31:2];
+            mtvec_base <= data_wr[`ADDR_WIDTH-1:2];
         end
     end
     
@@ -1139,7 +1207,7 @@ module csr_file(
     begin
         if(RESET) mepc <= `MEPC_RESET;
         else if(SET_EPC) mepc <= PC;
-        else if(CSR_ADDR == `MEPC && WR_EN) mepc <= {data_wr[31:2], 2'b00};
+        else if(CSR_ADDR == `MEPC && WR_EN) mepc <= {data_wr[`ADDR_WIDTH-1:2], 2'b00};
     end
 
     // MCAUSE register
@@ -1149,26 +1217,26 @@ module csr_file(
         if(RESET) 
         begin
             cause <= 4'b0000;
-            cause_rem <= 27'b0;
+            cause_rem <= 59'b0;
             int_or_exc <= 1'b0;
         end
         else if(SET_CAUSE)
         begin
             cause <= CAUSE_IN;
-            cause_rem <= 27'b0;
+            cause_rem <= 59'b0;
             int_or_exc <= I_OR_E;
         end
         else if(CSR_ADDR == `MCAUSE && WR_EN)
         begin
             cause <= data_wr[3:0];
-            cause_rem <= data_wr[30:4];
-            int_or_exc <= data_wr[31];
+            cause_rem <= data_wr[62:4];
+            int_or_exc <= data_wr[63];
             
         end
     end
     
     // MIP register
-    assign mip_reg = {20'b0, meip, 3'b0, mtip, 3'b0, msip, 3'b0};
+    assign mip_reg = {52'b0, meip, 3'b0, mtip, 3'b0, msip, 3'b0};
     assign MEIP_OUT = meip;
     assign MTIP_OUT = mtip;
     assign MSIP_OUT = msip;
@@ -1191,17 +1259,17 @@ module csr_file(
     // MTVAL register
     always @(posedge CLK)
     begin
-        if(RESET) mtval <= 32'b0;
+        if(RESET) mtval <= 64'b0;
         else if(SET_CAUSE)
         begin
             if(MISALIGNED_EXCEPTION) mtval <= IADDER_OUT;
-            else mtval <= 32'b0;
+            else mtval <= 64'b0;
         end
         else if(CSR_ADDR == `MTVAL && WR_EN) mtval <= data_wr;
     end
     
     // MCOUNTINHIBIT register
-    assign mcountinhibit = {29'b0, mcountinhibit_ir, 1'b0, mcountinhibit_cy};
+    assign mcountinhibit = {61'b0, mcountinhibit_ir, 1'b0, mcountinhibit_cy};
     always @(posedge CLK)
     begin
         if(RESET)
@@ -1221,9 +1289,9 @@ module csr_file(
     begin
         if(RESET)
         begin
-            mcycle <= {`MCYCLEH_RESET, `MCYCLE_RESET};
-            minstret <= {`MINSTRETH_RESET, `MINSTRET_RESET};
-            mtime <= {`TIMEH_RESET, `TIME_RESET};
+            mcycle <= `MCYCLEH_RESET;
+            minstret <= `MINSTRETH_RESET;
+            mtime <= `TIMEH_RESET;
         end
         else
         begin
@@ -1231,13 +1299,8 @@ module csr_file(
             
             if(CSR_ADDR == `MCYCLE && WR_EN)
             begin
-                if(mcountinhibit_cy == 1'b0) mcycle <= {mcycle[63:32], data_wr} + 1;
-                else mcycle <= {mcycle[63:32], data_wr};
-            end
-            else if(CSR_ADDR == `MCYCLEH && WR_EN)
-            begin
-                if(mcountinhibit_cy == 1'b0) mcycle <= {data_wr, mcycle[31:0]} + 1;
-                else mcycle <= {data_wr, mcycle[31:0]};
+                if(mcountinhibit_cy == 1'b0) mcycle <= data_wr + 1;
+                else mcycle <= data_wr;
             end
             else
             begin
@@ -1247,13 +1310,8 @@ module csr_file(
             
             if(CSR_ADDR == `MINSTRET && WR_EN)
             begin
-                if(mcountinhibit_ir == 1'b0) minstret <= {minstret[63:32], data_wr} + INSTRET_INC;
-                else minstret <= {minstret[63:32], data_wr};
-            end
-            else if(CSR_ADDR == `MINSTRETH && WR_EN)
-            begin
-                if(mcountinhibit_ir == 1'b0) minstret <= {data_wr, minstret[31:0]} + INSTRET_INC;
-                else minstret <= {data_wr, minstret[31:0]};
+                if(mcountinhibit_ir == 1'b0) minstret <= data_wr + INSTRET_INC;
+                else minstret <= data_wr;
             end
             else
             begin
@@ -1315,8 +1373,8 @@ module integer_file(
     assign op2_zero = rs2_addr_is_x0 == 1'b1 ? 1'b1 : 1'b0;
     assign rs1_wire = fwd_op1_enable == 1'b1 ? RD : Q[RS_1_ADDR];
     assign rs2_wire = fwd_op2_enable == 1'b1 ? RD : Q[RS_2_ADDR];
-    assign RS_1 = op1_zero == 1'b1 ? 32'h00000000 : rs1_wire;
-    assign RS_2 = op2_zero == 1'b1 ? 32'h00000000 : rs2_wire;
+    assign RS_1 = op1_zero == 1'b1 ? 64'h00000000 : rs1_wire;
+    assign RS_2 = op2_zero == 1'b1 ? 64'h00000000 : rs2_wire;
     
 endmodule
 
@@ -1329,7 +1387,7 @@ module decoder(
     input wire [1:0] IADDER_OUT_1_TO_0,
     input wire TRAP_TAKEN,
     
-    output wire [3:0] ALU_OPCODE,
+    output wire [5:0] ALU_OPCODE,
     output wire MEM_WR_REQ,
     output wire [1:0] LOAD_SIZE,
     output wire LOAD_UNSIGNED,
@@ -1357,6 +1415,8 @@ module decoder(
     wire is_csr;
     wire is_op;
     wire is_op_imm;
+    wire is_op_w;
+    wire is_op_imm_w;
     wire is_misc_mem;
     wire is_addi;
     wire is_slti;
@@ -1381,6 +1441,8 @@ module decoder(
     assign is_lui = ~OPCODE[6] & OPCODE[5] & OPCODE[4] & ~OPCODE[3] & OPCODE[2];
     assign is_op = ~OPCODE[6] & OPCODE[5] & OPCODE[4] & ~OPCODE[3] & ~OPCODE[2];
     assign is_op_imm = ~OPCODE[6] & ~OPCODE[5] & OPCODE[4] & ~OPCODE[3] & ~OPCODE[2];
+    assign is_op_w = ~OPCODE[6] & OPCODE[5] & OPCODE[4] & OPCODE[3] & ~OPCODE[2];
+    assign is_op_imm_w = ~OPCODE[6] & ~OPCODE[5] & OPCODE[4] & OPCODE[3] & ~OPCODE[2];
     assign is_addi = is_op_imm & ~FUNCT3[2] & ~FUNCT3[1] & ~FUNCT3[0]; 
     assign is_slti = is_op_imm & ~FUNCT3[2] & FUNCT3[1] & ~FUNCT3[0];
     assign is_sltiu = is_op_imm & ~FUNCT3[2] & FUNCT3[1] & FUNCT3[0];
@@ -1393,18 +1455,20 @@ module decoder(
     assign is_misc_mem = ~OPCODE[6] & ~OPCODE[5] & ~OPCODE[4] & OPCODE[3] & OPCODE[2];
     assign is_csr = is_system & (FUNCT3[2] | FUNCT3[1] | FUNCT3[0]);    
     assign IADDER_SRC = is_load | is_store | is_jalr;
-    assign RF_WR_EN = is_lui | is_auipc | is_jalr | is_jal | is_op | is_load | is_csr | is_op_imm;
+    assign RF_WR_EN = is_lui | is_auipc | is_jalr | is_jal | is_op | is_op_w | is_load | is_csr | is_op_imm | is_op_imm_w;
     assign CSR_WR_EN = is_csr;
     assign ALU_OPCODE[2:0] = FUNCT3;
     assign ALU_OPCODE[3] = FUNCT7_5 & ~(is_addi | is_slti | is_sltiu | is_andi | is_ori | is_xori);
+    assign ALU_OPCODE[4] = is_op_w | is_op_imm_w;
+    assign ALU_OPCODE[5] = FUNCT7_5 & is_op_w;
     assign WB_MUX_SEL[0] = is_load | is_auipc | is_jal | is_jalr;
     assign WB_MUX_SEL[1] = is_lui | is_auipc;
     assign WB_MUX_SEL[2] = is_csr | is_jal | is_jalr;
-    assign IMM_TYPE[0] = is_op_imm | is_load | is_jalr | is_branch | is_jal;
+    assign IMM_TYPE[0] = is_op_imm | is_op_imm_w | is_load | is_jalr | is_branch | is_jal;
     assign IMM_TYPE[1] = is_store | is_branch | is_csr;
     assign IMM_TYPE[2] = is_lui | is_auipc | is_jal | is_csr;
     assign CSR_OP = FUNCT3;
-    assign is_implemented_instr = is_op | is_op_imm | is_branch | is_jal | is_jalr | is_auipc | is_lui | is_system | is_misc_mem | is_load | is_store;
+    assign is_implemented_instr = is_op | is_op_w | is_op_imm | is_op_imm_w | is_branch | is_jal | is_jalr | is_auipc | is_lui | is_system | is_misc_mem | is_load | is_store;
     assign ILLEGAL_INSTR = ~OPCODE[1] | ~OPCODE[0] | ~is_implemented_instr;
     assign mal_word = FUNCT3[1] & ~FUNCT3[0] & (IADDER_OUT_1_TO_0[1] | IADDER_OUT_1_TO_0[0]);
     assign mal_half = ~FUNCT3[1] & FUNCT3[0] & IADDER_OUT_1_TO_0[0];
@@ -1421,15 +1485,17 @@ module load_unit(
     input wire [1:0] LOAD_SIZE,
     input wire LOAD_UNSIGNED,
     input wire [`DATA_WIDTH-1:0] DATA_IN,
-    input wire [1:0] IADDER_OUT_1_TO_0,
+    input wire [2:0] IADDER_OUT_2_TO_0,
     output reg [`DATA_WIDTH-1:0] OUTPUT
     
     );    
     
     reg [7:0] byte;
-    reg [15:0] half;    
-    wire [23:0] byte_ext;
-    wire [15:0] half_ext;
+    reg [15:0] half;
+    reg [31:0] word;
+    wire [55:0] byte_ext;
+    wire [47:0] half_ext;
+    wire [31:0] word_ext;
     
     always @*
     begin
@@ -1438,7 +1504,7 @@ module load_unit(
         
             2'b00: OUTPUT = {byte_ext, byte};
             2'b01: OUTPUT = {half_ext, half};
-            2'b10: OUTPUT = DATA_IN;
+            2'b10: OUTPUT = {word_ext, word};
             2'b11: OUTPUT = DATA_IN;
             
         endcase
@@ -1448,12 +1514,16 @@ module load_unit(
     always @*
     begin
     
-        case(IADDER_OUT_1_TO_0)
+        case(IADDER_OUT_2_TO_0)
         
-            2'b00: byte = DATA_IN[7:0];
-            2'b01: byte = DATA_IN[15:8];
-            2'b10: byte = DATA_IN[23:16];
-            2'b11: byte = DATA_IN[31:24];
+            3'b000: byte = DATA_IN[7:0];
+            3'b001: byte = DATA_IN[15:8];
+            3'b010: byte = DATA_IN[23:16];
+            3'b011: byte = DATA_IN[31:24];
+            3'b100: byte = DATA_IN[39:32];
+            3'b101: byte = DATA_IN[47:40];
+            3'b110: byte = DATA_IN[55:48];
+            3'b111: byte = DATA_IN[63:56];
             
         endcase
     
@@ -1462,18 +1532,32 @@ module load_unit(
     always @*
     begin
     
-        case(IADDER_OUT_1_TO_0[1])
+        case(IADDER_OUT_2_TO_0[2:1])
         
-            1'b0: half = DATA_IN[15:0];
-            1'b1: half = DATA_IN[31:16];
+            2'b00: half = DATA_IN[15:0];
+            2'b01: half = DATA_IN[31:16];
+            2'b10: half = DATA_IN[47:32];
+            2'b11: half = DATA_IN[63:48];
+            
+        endcase
+    
+    end
+
+    always @*
+    begin
+    
+        case(IADDER_OUT_2_TO_0[2])
+        
+            1'b0: word = DATA_IN[31:0];
+            1'b1: word = DATA_IN[63:32];
             
         endcase
     
     end
     
-    assign byte_ext = LOAD_UNSIGNED == 1'b1 ? 24'b0 : {24{byte[7]}};
-    assign half_ext = LOAD_UNSIGNED == 1'b1 ? 16'b0 : {16{half[15]}};
-                                                                
+    assign byte_ext = LOAD_UNSIGNED == 1'b1 ? 56'b0 : {56{byte[7]}};
+    assign half_ext = LOAD_UNSIGNED == 1'b1 ? 48'b0 : {48{half[15]}};
+    assign word_ext = LOAD_UNSIGNED == 1'b1 ? 32'b0 : {32{word[31]}};                                                            
 endmodule
 
 module machine_control(
