@@ -72,7 +72,7 @@ module mra_controller#(
    // MRA_req_addr register
    always @(posedge clk or negedge rst_n)begin
       if(!rst_n)begin // reset register
-         MRA_req_addr <= {WL_LEN_BITS{1'b0}};
+         MRA_req_addr <= {ADDR_WIDTH{1'b0}};
       end else if (inc_MRA_req_addr & en_dp_load) begin // enable register
          if(en_dp_load)begin
             MRA_req_addr <= WL_addr;
@@ -92,7 +92,7 @@ module mra_controller#(
       if (!rst_n)
          state <= IDLE;
       else
-	 state <= nxt_state;
+	      state <= nxt_state;
    end
 			
    // state machine combinational logic

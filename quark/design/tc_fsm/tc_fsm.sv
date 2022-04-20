@@ -31,4 +31,24 @@ module tc_fsm #(
    // SIGNAL NETWORK INTERFACE
    sn_tc_if.tc                  sn_if);
 
+   // ** INTERNAL SIGNALS **
+   logic                        fifo_wr;
+   logic                        fifo_rd;
+   logic                        fifo_rd_data;
+   logic                        fifo
+
+   // Work Item Queue
+   c_fifo wi_queue(.clk(clk), 
+                   .reset(rst_n),
+                   .push_active(fifo_wr_en),
+                   .pop_active(), 
+                   .push(), 
+                   .pop(), 
+                   .push_data(), 
+                   .pop_data(), 
+                   .almost_empty(), 
+                   .empty(), 
+                   .full(), 
+                   .errors());
+
 endmodule
