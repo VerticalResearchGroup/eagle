@@ -1,9 +1,7 @@
 #include "utils.h"
 
-namespace ptdlprim {
-    DT_INT8,
-    DT_UINT8,
-    DT_FP16
+namespace torch_plugin {
+
     electron::DataType todp(c10::ScalarType tp)
     {
         switch(tp) {
@@ -24,7 +22,7 @@ namespace ptdlprim {
         }
     }
 
-    cl::Buffer buffer_from_tensor(torch::Tensor const &tt)
+    electron::Buffer buffer_from_tensor(torch::Tensor const &tt)
     {
         TORCH_CHECK(tt.device().type() == c10::DeviceType::OPENCL,"OpenCL device is required for tensor");
         TORCH_CHECK(tt.numel() > 0,"Buffer is not valid for unallocated defvice");
@@ -54,7 +52,7 @@ namespace ptdlprim {
         return res;
     }
 
-    torch::Tensor new_ocl_tensor(torch::IntArrayRef size,c10::Device dev,c10::ScalarType type)
+    torch::Tensor new_upcycle_tensor(torch::IntArrayRef size,c10::Device dev,c10::ScalarType type)
     {
         size_t n = 1;
         for(auto const &v:size)
@@ -81,10 +79,10 @@ namespace ptdlprim {
 
     torch::Tensor new_tensor_as(dlprim::Shape const &s,torch::Tensor const &as)
     {
-        int64_t shape[dlprim::max_tensor_dim];
+        int64_t shape[electron::max_tensor_dim];
         for(int i=0;i<s.size();i++)
             shape[i]=s[i];
-        torch::Tensor result = new_ocl_tensor(c10::IntArrayRef(shape,s.size()),
+        torch::Tensor result = new_upcycle_tensor(c10::IntArrayRef(shape,s.size()),
                                               as.device(),
                                               as.dtype().toScalarType());
         return result;
@@ -93,7 +91,7 @@ namespace ptdlprim {
     static at::DataPtr allocate(c10::Device const &dev,size_t n)
     {
         std::unique_ptr<CLMemAllocation> ptr=alloc(dev.index(),n);
-        cl_mem buffer = ptr->buffer();
+        //cl_mem buffer = ptr->buffer();
         return at::DataPtr(buffer,ptr.release(),&CLContextManager::free_ptr,dev);
     }
 

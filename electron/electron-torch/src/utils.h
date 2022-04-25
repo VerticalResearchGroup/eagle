@@ -14,27 +14,28 @@ inline void sync_if_needed(c10::Device const &d)
     return;
 }
 
-dlprim::DataType todp(c10::ScalarType tp);
-    
-inline dlprim::DataType todp(caffe2::TypeMeta meta)
+electron::DataType todp(c10::ScalarType tp);    
+inline electron::DataType todp(caffe2::TypeMeta meta)
 {
     return todp(meta.toScalarType());
 
 }
 
-inline dlprim::ExecutionContext getExecutionContext(c10::Device dev)
+/*inline dlprim::ExecutionContext getExecutionContext(c10::Device dev)
 {
     return CLContextManager::getCommandQueue(dev.index());
 }
+
 inline dlprim::ExecutionContext getExecutionContext(torch::Tensor const &t)
 {        
     return getExecutionContext(t.device());
 }
+*/
 
-// APU function definitions
+// API function definitions
 torch::Tensor new_tensor_as(dlprim::Shape const &s,torch::Tensor const &as);
-cl::Buffer buffer_from_tensor(torch::Tensor const &tt);
-dlprim::Tensor todp(torch::Tensor const &tt);
+//cl::Buffer buffer_from_tensor(torch::Tensor const &tt);
+electron::Tensor todp(torch::Tensor const &tt);
 torch::Tensor new_upcycle_tensor(torch::IntArrayRef size,c10::Device dev,c10::ScalarType type=c10::kFloat);
 
 
