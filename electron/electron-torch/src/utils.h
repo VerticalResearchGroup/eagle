@@ -10,7 +10,8 @@ namespace torch_plugin {
     /// 
 inline void sync_if_needed(c10::Device const &d)
 {
-    CLContextManager::sync_if_needed(d.index());
+    //CLContextManager::sync_if_needed(d.index());
+    return;
 }
 
 dlprim::DataType todp(c10::ScalarType tp);
@@ -21,10 +22,6 @@ inline dlprim::DataType todp(caffe2::TypeMeta meta)
 
 }
 
-cl::Buffer buffer_from_tensor(torch::Tensor const &tt);
-dlprim::Tensor todp(torch::Tensor const &tt);
-torch::Tensor new_ocl_tensor(torch::IntArrayRef size,c10::Device dev,c10::ScalarType type=c10::kFloat);
-
 inline dlprim::ExecutionContext getExecutionContext(c10::Device dev)
 {
     return CLContextManager::getCommandQueue(dev.index());
@@ -34,8 +31,13 @@ inline dlprim::ExecutionContext getExecutionContext(torch::Tensor const &t)
     return getExecutionContext(t.device());
 }
 
-
+// APU function definitions
 torch::Tensor new_tensor_as(dlprim::Shape const &s,torch::Tensor const &as);
+cl::Buffer buffer_from_tensor(torch::Tensor const &tt);
+dlprim::Tensor todp(torch::Tensor const &tt);
+torch::Tensor new_upcycle_tensor(torch::IntArrayRef size,c10::Device dev,c10::ScalarType type=c10::kFloat);
+
+
 //electron::Tensor make_workspace(at::DataPtr &ws_ptr,size_t ws_size,c10::Device const &dev);
 // TODO : see if we need workspace guard
 /*class WSGuard {
