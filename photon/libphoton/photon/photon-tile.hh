@@ -20,6 +20,17 @@ struct TileEmu {
     Vreg gp_regs[32];
     Vreg t_regs[8];
     uint64_t vmask = 0xffff'ffff'ffff'ffffULL;
+    uint64_t inst_count[64] = {0};
+    enum op_types {op_vadd_i8,op_vadds_i8,op_vadd_u8,op_vadds_u8,op_vadd_fp16,
+    op_vsub_i8,op_vsubs_i8,op_vsub_u8,op_vsubs_u8,op_vsub_fp16,
+    op_vmul_i8,op_vmuls_i8,op_vmul_u8,op_vmuls_u8,op_vmul_fp16,
+    op_vdiv_i8,op_vdivs_i8,op_vdiv_u8,op_vdivs_u8,op_vdiv_fp16,
+    op_vfma_i8_i32,op_vfmas_i8_i32,op_vfma_u8_u32,op_vfmas_u8_u32,
+    op_vrelu_i8,op_vrelu_u8,op_vrelu_fp16,
+    op_vtanh_i8,op_vtanh_u8,op_vtanh_fp16,
+    op_vsigmoid_i8,op_vsigmoid_u8,op_vsigmoid_fp16,
+    op_vld,op_vst
+    };
 
     TileEmu(size_t _tile_id, std::shared_ptr<PhotonHooks> _hooks) :
         tile_id(_tile_id),
@@ -30,9 +41,11 @@ struct TileEmu {
         dt * src1_ ## dt = (dt *)src1.bytes; \
         dt * src2_ ## dt = (dt *)src2.bytes; \
         dt * dst_ ## dt = (dt *)dst.bytes; \
+        op_types op_index = op_ ## name; \
         for (size_t i = 0; i < nelem; i++) \
             if (vmask & (1 << i)) { \
                 (dst_ ## dt)[i] = op((src1_ ## dt)[i], (src2_ ## dt)[i]); \
+                inst_count[op_index] = inst_count[op_index] + 1;\
             } \
     }
 
@@ -65,6 +78,7 @@ struct TileEmu {
         dt_inp * src1_ ## dt_inp = (dt_inp *)src1.bytes; \
         dt_inp * src2_ ## dt_inp = (dt_inp *)src2.bytes; \
         dt_acc * acc_ ## dt_acc = (dt_acc *)acc.bytes; \
+        op_types op_index = op_ ## name; \
         for (size_t i = 0; i < 16; i++) \
             if (vmask & (1 << i)) \
                 for (size_t j = i * 4; j < (i + 1) * 4; j++) \
@@ -89,8 +103,12 @@ struct TileEmu {
 #define UNARY_OP(name, dt, nelem, op) \
     inline void name(Vreg& reg) { \
         dt * reg_ ## dt = (dt *)reg.bytes; \
+        op_types op_index = op_ ## name; \
         for (size_t i = 0; i < nelem; i++) \
-            if (vmask & (1 << i)) (reg_ ## dt)[i] = op((reg_ ## dt)[i]); \
+            if (vmask & (1 << i)) { \
+                (reg_ ## dt)[i] = op((reg_ ## dt)[i]); \
+                inst_count[op_index] = inst_count[op_index] + 1;\
+            } \
     }
 
     UNARY_OP(vrelu_i8,  int8_t,  64, arithmetic::relu_i8)
@@ -106,15 +124,22 @@ struct TileEmu {
     UNARY_OP(vsigmoid_fp16, half, 32, arithmetic::sigmoid_fp16)
 
     inline void vld(uint8_t * addr, Vreg& dst) {
-        hooks->on_mem_read(tile_id, (uintptr_t)addr);
+        hooks->on_mem_access(tile_id, (uintptr_t)addr);
         for (size_t i = 0; i < 64; i++) {
-            if (vmask & (1 << i)) dst.bytes[i] = addr[i];
+            if (vmask & (1 << i)) {
+                dst.bytes[i] = addr[i];
+                inst_count[op_vld] = inst_count[op_vld] + 1;\
+            }
         }
     }
 
     inline void vst(uint8_t * addr, Vreg& dst) {
+        hooks->on_mem_access(tile_id, (uintptr_t)addr);
         for (size_t i = 0; i < 64; i++) {
-            if (vmask & (1 << i)) addr[i] = dst.bytes[i];
+            if (vmask & (1 << i)) {
+                addr[i] = dst.bytes[i];
+                inst_count[op_vst] = inst_count[op_vst] + 1;\
+            }
         }
     }
 

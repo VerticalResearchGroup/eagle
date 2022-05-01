@@ -18,7 +18,7 @@ struct PhotonHook {
 };
 
 struct PhotonHooks {
-    PhotonHook<size_t, uintptr_t> on_mem_read;
+    PhotonHook<size_t, uintptr_t> on_mem_access;
     // TODO: Declare hooks here
 };
 

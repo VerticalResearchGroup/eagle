@@ -112,4 +112,19 @@ void FirstFitAllocator::print_memory() {
     printf("]\n");
 }
 
+bool FirstFitAllocator::is_allocated(uint64_t block) {
+
+    //printf("Verifying address %lu\n",block);
+    std::shared_ptr<MemBlock> node = heap_start;
+    bool found = false;
+    do {
+        if (block >= node->offset && block < (node->offset + node->size)) {
+            found = true;
+            break;
+        }
+    } while ((node = node->next));
+
+    return found;
+}
+
 }

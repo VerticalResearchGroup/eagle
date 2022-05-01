@@ -26,6 +26,7 @@ public:
     std::optional<uintptr_t> dev_malloc(size_t requested);
     void dev_free(uint64_t block);
     void print_memory();
+    bool is_allocated(uint64_t block);
 };
 
 }

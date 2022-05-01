@@ -16,6 +16,13 @@ PhotonBackend::PhotonBackend() :
     dev_base(mmap(NULL, (unsigned long int) 8 * (1 << 30), PROT_READ | PROT_WRITE, MAP_ANONYMOUS | MAP_SHARED, -1, 0))
 {
     assert(dev_base != MAP_FAILED);
+
+    emu->hooks->on_mem_access.callbacks.push_back(
+        [allocator=this->allocator, dev_base=this->dev_base](size_t tile_id, uintptr_t addr) {
+            if (!allocator->is_allocated((uint64_t)((uintptr_t)addr - (uintptr_t)dev_base))) {
+                throw std::runtime_error("Emulator access violation!");
+            }
+        });
 }
 
 void PhotonBackend::loadlib(const std::string& filename) {
