@@ -132,7 +132,7 @@ Before starting to run the benchmark, you need change these two datapaths accord
 
 Then, run the training:
 
-```bash
+```
 bash scripts/train.sh
 ```
 
@@ -144,13 +144,13 @@ Run the container using the code defined in 2.a.3
 Inside the container, use the following script to start training.
 Make sure the downloaded and preprocessed dataset is located at `<DATA_DIR>/LibriSpeech`, which corresponds to `/datasets/LibriSpeech` inside the container.
 
-```bash
+```
 bash scripts/train_gpu.sh
 ```
 
 This script tries to use 8 GPUs by default.
 To run 1-gpu training, use the following command:
 
-```bash
+```
 NUM_GPUS=1 GRAD_ACCUMULATION_STEPS=64 scripts/train_gpu.sh
 ```
