@@ -13,12 +13,10 @@ For CPU version, follow steps 2.b, 2.c, 2.d, and 3.a.
 ```
 source scripts/install_cuda_docker.sh
 ```
-If you don't have the training directory which is from https://github.com/mlcommons/training/, clone it for GPU version.
 
 2. Build the docker image for the single stage detection task
 ```
 # Build from Dockerfile
-cd training/rnn_speech_recognition/pytorch/
 bash scripts/docker/build.sh
 ```
 
@@ -79,7 +77,7 @@ Once the data download is complete, the following folders should exist:
    * `test-other/`
 
 Next, convert the data into WAV files:
-```bash
+```
 bash scripts/preprocess_librispeech.sh
 ```
 Once the data is converted, the following additional files and folders should exist:
@@ -112,6 +110,7 @@ For evaluation, the `librispeech-dev-clean-wav.json` is used in GPU version (opt
 # 2.d Install Warp-Transducer Loss for CPU version
 
 ```
+git clone https://github.com/HawkAaron/warp-transducer.git
 cd warp-transducer
 mkdir build; cd build
 export WARP_RNNT_PATH=/path/to/warp-transducer/build
