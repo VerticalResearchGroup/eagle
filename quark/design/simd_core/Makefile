@@ -1,4 +1,5 @@
 comp: riscv_32_test_pkg.sv steel_core_64.v steel_core_tb.sv
+	make -f make_vec comp
 	vlog -v -vinputport=net -work work steel_core_64.v
 	vlog -sv -svinputport=net -work work +incdir+./riscv-tests/ steel_core_tb.sv
 	vlog -sv -svinputport=net -work work simd_core_top.sv
