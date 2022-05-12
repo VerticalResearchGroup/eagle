@@ -1,0 +1,26 @@
+COMSRC_PATH = ../com/src/
+comp: forwardingUnit_r0.v $(COMSRC_PATH)/mux.v hazardDetectionUnit.v $(COMSRC_PATH)/delay.v $(COMSRC_PATH)/c_fifo.v controller_r0.v registerFile.v repeater.v  datapath_r0.v
+	vlog -v -vinputport=net -work work +incdir+./ forwardingUnit_r0.v 
+	vlog -v -vinputport=net -work work +incdir+$(COMSRC_PATH) $(COMSRC_PATH)/mux.v
+	vlog -v -vinputport=net -work work +incdir+./ hazardDetectionUnit.v
+	vlog -v -vinputport=net -work work +incdir+$(COMSRC_PATH) $(COMSRC_PATH)/delay.v
+	vlog -v -vinputport=net -work work +incdir+$(COMSRC_PATH) $(COMSRC_PATH)/c_fifo.v
+	vlog -v -vinputport=net -work work +incdir+./ controller_r0.v
+	vlog -v -vinputport=net -work work +incdir+./ registerFile.v
+	vlog -v -vinputport=net -work work +incdir+./ repeater.v
+	vlog -v -vinputport=net -work work +incdir+./ datapath_r0.v
+	#riscv_32_test_pkg.sv
+
+sim: 
+	#quit -sim
+	#vdel -all -lib work
+	#vlib work
+	#vmap work work
+	vsim -c work.steel_core_tb 
+	run 10ns
+
+all:
+	vlog -sv -svinputport=net -work work +incdir+../com/intf/ top_quark.sv
+	vsim work.top_quark 
+	run 10ns
+	
