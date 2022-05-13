@@ -2,6 +2,7 @@
 /* $LastChangedDate: 2009-03-04 23:09:45 -0600 (Wed, 04 Mar 2009) $ */
 /* $Rev: 45 $ */
 // Memories used by the cache:
+`include "../defs/mem_sys_constants.v"
 
 module memc (data_out, addr, data_in, write, clk, rst, createdump, file_id);
    parameter Size = 1;
@@ -14,7 +15,7 @@ module memc (data_out, addr, data_in, write, clk, rst, createdump, file_id);
    input             createdump;
    input [4:0]       file_id;
 
-   reg [Size-1:0]    mem [0:255];
+   reg [Size-1:0]    mem [0:`L1_NUM_SETS];
 
    integer           mcd;
    integer           i;

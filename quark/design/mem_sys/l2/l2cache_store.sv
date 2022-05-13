@@ -22,16 +22,16 @@ module cache (
               input clk,
               input rst,
               input createdump,
-              input [`L2_TAG_WIDTH-1:0] tag_in, // 51 bits of tag
-              input [`L2_INDEX_WIDTH-1:0] index,   // 7 bits for 256 lines 
+              input [`L2_TAG_WIDTH-1:0] tag_in, // 45 bits of tag
+              input [`L2_INDEX_WIDTH-1:0] index,   // 13 bits for 256 lines 
               input [`L2_OFFSET_WIDTH-1:0] offset,  // 6 bits unused since addresses are 64B
-              input [`DATA_WIDTH-1:0] data_in, // Cache line size of 64B
+              input [`L2_DATA_WIDTH-1:0] data_in, // Cache line size of 64B
               input comp,
               input write,
               input valid_in,
 
               output [`L2_TAG_WIDTH-1:0] tag_out,
-              output [`DATA_WIDTH-1:0] data_out,
+              output [`L2_DATA_WIDTH-1:0] data_out,
               output hit,
               output dirty,
               output valid,
@@ -46,7 +46,7 @@ module cache (
    wire [4:0]        ram4_id = (cache_id<<3) + 4;
    wire [4:0]        ram5_id = (cache_id<<3) + 5;
 
-   wire [`DATA_WIDTH-1:0]       w0; //, w1, w2, w3;
+   wire [`L2_DATA_WIDTH-1:0]       w0; //, w1, w2, w3;
    assign            go = enable & ~rst;
    assign            match = (tag_in == tag_out);
 
@@ -62,10 +62,10 @@ module cache (
    assign            wr_valid = go & write & ~comp;
    assign            dirty_in = comp;  // a compare-and-write sets dirty; a cache-fill clears it
 
-   memc #(512) mem_w0 (w0,      index, data_in,  wr_word0, clk, rst, createdump, ram0_id);
+   memc #(`L2_DATA_WIDTH-1) mem_w0 (w0,      index, data_in,  wr_word0, clk, rst, createdump, ram0_id);
    //memc #(16) mem_w1 (w1,      index, data_in,  wr_word1, clk, rst, createdump, ram1_id);
 
-   memc #( 5) mem_tg (tag_out, index, tag_in,   wr_tag,   clk, rst, createdump, ram4_id);
+   memc #(`L2_TAG_WIDTH-1) mem_tg (tag_out, index, tag_in,   wr_tag,   clk, rst, createdump, ram4_id);
    memc #( 1) mem_dr (dirtybit,index, dirty_in, wr_dirty, clk, rst, createdump, ram5_id);
    memv       mem_vl (validbit,index, valid_in, wr_valid, clk, rst, createdump, ram0_id);
 

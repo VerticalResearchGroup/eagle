@@ -4,26 +4,13 @@
 //Common constants
 `define KB              1024
 `define ADDR_WIDTH      64
-`define DATA_WIDTH      512
-
-`define L1_BLOCK_SIZE   64
-`define L1_NUM_SETS     256
-
-`define L1_INDEX_WIDTH  $clog2(`L1_NUM_SETS)
-`define L1_OFFSET_WIDTH $clog2(`L1_BLOCK_SIZE)
-`define L1_TAG_WIDTH    `ADDR_WIDTH - `L1_INDEX_WIDTH - `L1_OFFSET_WIDTH
-
-`define L1_NUM_WAYS     4
-`define L1_CACHE_SIZE   `L1_BLOCK_SIZE*`L1_NUM_SETS*`L1_NUM_WAYS
-
-
-
+`define L2_DATA_WIDTH   512
 `define L2_BLOCK_SIZE   64
-`define L2_NUM_SETS     256
+`define L2_NUM_SETS     8192
 
 `define L2_INDEX_WIDTH  $clog2(`L2_NUM_SETS)
 `define L2_OFFSET_WIDTH $clog2(`L2_BLOCK_SIZE)
 `define L2_TAG_WIDTH    `ADDR_WIDTH - `L2_INDEX_WIDTH - `L2_OFFSET_WIDTH
 
-`define L2_NUM_WAYS     4
+`define L2_NUM_WAYS     2
 `define L2_CACHE_SIZE   `L2_BLOCK_SIZE*`L2_NUM_SETS*`L2_NUM_WAYS
